@@ -34,7 +34,7 @@ class S3FileSystem(FileSystem):
         if endpoint is None:
             endpoint = os.environ[endpoint_env_var]
 
-        kwargs = {"anon": anon, "endpoint": endpoint}
+        kwargs = {"anon": anon, "endpoint_url": f"https://{endpoint}"}
         if os.environ.get(key_env_var) is not None:
             kwargs["key"] = os.environ[key_env_var]
         if os.environ.get(secret_env_var) is not None:
@@ -45,7 +45,6 @@ class S3FileSystem(FileSystem):
         self._fs = s3fs.S3FileSystem(**kwargs)
 
     def copy(self, lpath, rpath):
-        rpath = f"{rpath}/"
         self._fs.put(lpath, rpath, recursive=True)
 
     def makedirs(self, path):
@@ -56,7 +55,7 @@ class S3FileSystem(FileSystem):
         return f
 
     def get_path(self, path: str):
-        return s3fs.S3Map(root=f"s3://{path}", s3=self._fs)
+        return s3fs.S3Map(root=path, s3=self._fs)
 
     def exists(self, path: str):
         return self._fs.exists(path)
@@ -64,7 +63,6 @@ class S3FileSystem(FileSystem):
 
 class LocalFileSystem(FileSystem):
     def copy(self, lpath, rpath):
-        rpath = f"{rpath}/"
         shutil.copytree(lpath, rpath)
 
     def makedirs(self, path):
