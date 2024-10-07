@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Dict, Tuple
 
 import numpy as np
 
@@ -10,7 +11,7 @@ class SSHData:
         self.resource = resource
         self.dataset = None
 
-    def open_dataset(self, rename: dict = None):
+    def open_dataset(self, rename: Dict[str, str] = None):
         ds = self.resource.open()
 
         if rename is not None:
@@ -26,7 +27,11 @@ class SSHData:
 
         self.dataset = ds[["adt", "sla"]]
 
-    def apply_extent(self, spatial_extent: [float, float, float, float] = None, temporal_extent: [str, str] = None):
+    def apply_extent(
+        self, 
+        spatial_extent: Tuple[float, float, float, float] = None, 
+        temporal_extent: Tuple[str, str] = None
+    ):
         ds = self.dataset
 
         if spatial_extent is not None:

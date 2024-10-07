@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, List
 
 import jaxparrow as jpw
 from jaxtyping import Array, Float
@@ -15,7 +15,7 @@ def cyclogeostrophy(
     var_lr: float = 0.005,
     it_use_filter: bool = False,
     it_filter_size: int = 3
-) -> [Float[Array, "(time) lat lon"], ...]:
+) -> List[Float[Array, "(time) lat lon"]]:
     # convenient wrapper to avoid too much verbosity when using vmap and shmap
     def partial_cyclogeostrophy(partial_adt_t, partial_mask):
         return jpw.cyclogeostrophy(

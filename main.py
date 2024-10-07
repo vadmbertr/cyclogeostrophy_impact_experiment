@@ -48,12 +48,12 @@ def assess_cyclogeostrophy_impact(
     experiment_data: ExperimentData,  # where and how experiment description and outputs are stored
     ssh_data: SSHData,  # input SSH data
     drifter_data: DrifterData,  # input drifter data
-    ssh_rename: Dict[str, str] = None,  # dictionary mapping SSH dataset original to new variables names
-    drifter_rename: Dict[str, str] = None,  # dictionary mapping drifter dataset original to new variables names
+    ssh_rename: Dict[str, str] | None = None,  # dictionary mapping SSH dataset original to new variables names
+    drifter_rename: Dict[str, str] | None = None,  # dictionary mapping drifter dataset original to new variables names
     ssh_preproc: Callable = ssh_lon_to_180_180_preproc_conf,  # preprocessing applied to the drifters
     drifter_preproc: Callable = drifter_default_preproc_conf,  # preprocessing applied to the drifters
-    spatial_extent: Tuple[float, float, float, float] = None,  # spatial domain bounding box ([lon0, lon1, lat0, lat1])
-    temporal_extent: Tuple[str, str] = None,  # temporal domain window
+    spatial_extent: Tuple[float, float, float, float] | None = None,  # spatial domain bounding box ([lon0, lon1, lat0, lat1])
+    temporal_extent: Tuple[str, str] | None = None,  # temporal domain window
     cyclogeostrophy_fun: Callable = cyclogeostrophy_conf,  # callable for the cyclogeostrophy, with parameters set
     bin_size: int = 1,  # bins size for the errors computed vs. the drifters data (in °)
     save_all_times: bool = True,  # whether to save intermediate inversions

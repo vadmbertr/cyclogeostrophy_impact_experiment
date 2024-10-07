@@ -5,10 +5,10 @@ import s3fs
 
 
 class FileSystem:
-    def copy(self, lpath, rpath):
+    def copy(self, lpath: str, rpath: str):
         raise NotImplementedError
 
-    def makedirs(self, path):
+    def makedirs(self, path: str):
         raise NotImplementedError
 
     def open(self, path: str, mode: str):
@@ -44,10 +44,10 @@ class S3FileSystem(FileSystem):
 
         self._fs = s3fs.S3FileSystem(**kwargs)
 
-    def copy(self, lpath, rpath):
+    def copy(self, lpath: str, rpath: str):
         self._fs.put(lpath, rpath, recursive=True)
 
-    def makedirs(self, path):
+    def makedirs(self, path: str):
         self._fs.makedirs(path, exist_ok=True)
 
     def open(self, path: str, mode: str):
@@ -62,10 +62,10 @@ class S3FileSystem(FileSystem):
 
 
 class LocalFileSystem(FileSystem):
-    def copy(self, lpath, rpath):
+    def copy(self, lpath: str, rpath: str):
         shutil.copytree(lpath, rpath)
 
-    def makedirs(self, path):
+    def makedirs(self, path: str):
         os.makedirs(path, exist_ok=True)
 
     def open(self, path: str, mode: str):

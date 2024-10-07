@@ -1,6 +1,6 @@
 from functools import partial
 import math
-from typing import Callable
+from typing import Callable, List, Tuple
 
 import numpy as np
 import jax
@@ -11,7 +11,7 @@ from jax.sharding import PartitionSpec as P
 from jaxtyping import Array, Float
 
 
-def pad(n_batches: int, arrs: [Float[Array, "time lat lon"], ...]) -> ([Float[Array, "time_pad lat lon"], ...], int):
+def pad(n_batches: int, arrs: List[Float[Array, "time lat lon"]]) -> Tuple[List[Float[Array, "time_pad lat lon"]], int]:
     batch_dim = arrs[0].shape[0]
     div_res = math.ceil(batch_dim / n_batches)
     pad_with = n_batches * div_res - batch_dim
@@ -21,7 +21,7 @@ def pad(n_batches: int, arrs: [Float[Array, "time lat lon"], ...]) -> ([Float[Ar
     return arrs, pad_with
 
 
-def unpad(pad_with: int, arrs: [Float[Array, "(time_pad) lat lon"], ...]) -> [Float[Array, "(time) lat lon"], ...]:
+def unpad(pad_with: int, arrs: List[Float[Array, "time lat lon"]]) -> List[Float[Array, "(time) lat lon"]]:
     if pad_with > 0:
         for i in range(len(arrs)):
             if arrs[i].shape == 3:  # unpad does not apply to lat lon arrays
@@ -32,8 +32,8 @@ def unpad(pad_with: int, arrs: [Float[Array, "(time_pad) lat lon"], ...]) -> [Fl
 def pad_wrapper(
         n_batches: int,
         f: Callable,
-        arrs: [Float[Array, "time lat lon"], ...]
-) -> [Float[Array, "time lat lon"], ...]:
+        arrs: List[Float[Array, "time lat lon"]]
+) -> List[Float[Array, "time lat lon"]]:
     pad_arrs, pad_with = pad(n_batches, arrs)
     pad_res = f(*pad_arrs)
     unpad_res = unpad(pad_with, pad_res)

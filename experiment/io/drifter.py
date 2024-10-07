@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Dict
 
 import clouddrift as cd
 import numpy as np
@@ -14,7 +15,7 @@ class DrifterData:
 
     def open_dataset(
         self,
-        rename: dict = None,
+        rename: Dict[str, str] = None,
         ssh_data: SSHData = None,
     ):
         ds = self.resource.open()
@@ -23,12 +24,12 @@ class DrifterData:
             ds = ds.rename(rename)
 
         if ssh_data is not None:
-            start_time = ssh_data.dataset["time"].min()
-            end_time = ssh_data.dataset["time"].max()
-            min_lon = ssh_data.dataset["longitude"].min()
-            max_lon = ssh_data.dataset["longitude"].max()
-            min_lat = ssh_data.dataset["latitude"].min()
-            max_lat = ssh_data.dataset["latitude"].max()
+            start_time = ssh_data.dataset["time"].min().values
+            end_time = ssh_data.dataset["time"].max().values
+            min_lon = ssh_data.dataset["longitude"].min().values
+            max_lon = ssh_data.dataset["longitude"].max().values
+            min_lat = ssh_data.dataset["latitude"].min().values
+            max_lat = ssh_data.dataset["latitude"].max().values
 
             ds = cd.ragged.subset(
                 ds,
