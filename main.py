@@ -1,6 +1,7 @@
 import logging
 from collections.abc import Callable
 import os
+from typing import Dict, Tuple
 
 from dotenv import load_dotenv
 from hydra.core.hydra_config import HydraConfig
@@ -10,16 +11,16 @@ from hydra_zen import store, zen, make_custom_builds_fn
 
 from experiment.evaluation._process import estimate_and_evaluate
 from experiment.evaluation.visualization import plot_fields
-from experiment.io import drifter_store, experiment_store, ssh_store # noqa
+from experiment.io import drifter_store, experiment_store, ssh_store
 from experiment.io.drifter import DrifterData
 from experiment.io.experiment import ExperimentData
 from experiment.io.ssh import SSHData
 from experiment.logger._logger import LOGGER
 from experiment.methods import cyclogeostrophy_conf
 from experiment.preproc import (
-    drifter_preproc_store, # noqa
+    drifter_preproc_store,
     drifter_default_preproc_conf,
-    ssh_preproc_store, # noqa
+    ssh_preproc_store,
     ssh_lon_to_180_180_preproc_conf
 )
 
@@ -47,12 +48,12 @@ def assess_cyclogeostrophy_impact(
     experiment_data: ExperimentData,  # where and how experiment description and outputs are stored
     ssh_data: SSHData,  # input SSH data
     drifter_data: DrifterData,  # input drifter data
-    ssh_rename: {} = None,  # dictionary mapping SSH dataset original to new variables names
-    drifter_rename: {} = None,  # dictionary mapping drifter dataset original to new variables names
+    ssh_rename: Dict[str, str] = None,  # dictionary mapping SSH dataset original to new variables names
+    drifter_rename: Dict[str, str] = None,  # dictionary mapping drifter dataset original to new variables names
     ssh_preproc: Callable = ssh_lon_to_180_180_preproc_conf,  # preprocessing applied to the drifters
     drifter_preproc: Callable = drifter_default_preproc_conf,  # preprocessing applied to the drifters
-    spatial_extent: [float, float, float, float] = None,  # spatial domain bounding box ([lon0, lon1, lat0, lat1])
-    temporal_extent: [str, str] = None,  # temporal domain window
+    spatial_extent: Tuple[float, float, float, float] = None,  # spatial domain bounding box ([lon0, lon1, lat0, lat1])
+    temporal_extent: Tuple[str, str] = None,  # temporal domain window
     cyclogeostrophy_fun: Callable = cyclogeostrophy_conf,  # callable for the cyclogeostrophy, with parameters set
     bin_size: int = 1,  # bins size for the errors computed vs. the drifters data (in °)
     save_all_times: bool = True,  # whether to save intermediate inversions
@@ -140,7 +141,7 @@ def assess_cyclogeostrophy_impact(
         f"SSH domain dimensions: {ssh_data.dataset.dims}"
     )
     LOGGER.info("1.2.1. Loading drifters")
-    drifter_data.open_dataset(drifter_rename, spatial_extent, temporal_extent)
+    drifter_data.open_dataset(drifter_rename, ssh_data)
     LOGGER.info("1.2.2. Preprocessing drifters")
     LOGGER.debug(
         f"before preprocessing: "

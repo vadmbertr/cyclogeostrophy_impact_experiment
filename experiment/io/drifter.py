@@ -4,6 +4,7 @@ import clouddrift as cd
 import numpy as np
 
 from ._resource import CopernicusResource, Resource
+from .ssh import SSHData
 
 
 class DrifterData:
@@ -13,33 +14,28 @@ class DrifterData:
 
     def open_dataset(
         self,
-        rename: dict,
-        spatial_extent: [float, float, float, float] = None,
-        temporal_extent: [str, str] = None
+        rename: dict = None,
+        ssh_data: SSHData = None,
     ):
         ds = self.resource.open()
 
         if rename is not None:
             ds = ds.rename(rename)
 
-        if spatial_extent is not None:
-            ds = cd.ragged.subset(
-                ds,
-                {
-                    "lon": lambda lon: ((lon >= spatial_extent[0]) & (lon <= spatial_extent[1])),
-                    "lat": lambda lat: ((lat >= spatial_extent[2]) & (lat <= spatial_extent[3])),
-                },
-                row_dim_name="traj"
-            )
+        if ssh_data is not None:
+            start_time = ssh_data.dataset["time"].min()
+            end_time = ssh_data.dataset["time"].max()
+            min_lon = ssh_data.dataset["longitude"].min()
+            max_lon = ssh_data.dataset["longitude"].max()
+            min_lat = ssh_data.dataset["latitude"].min()
+            max_lat = ssh_data.dataset["latitude"].max()
 
-        if temporal_extent is not None:
             ds = cd.ragged.subset(
                 ds,
                 {
-                    "time": lambda time: (
-                        (time >= np.datetime64(temporal_extent[0])) &
-                        (time <= np.datetime64(temporal_extent[1]))
-                    )
+                    "time": lambda time: (time >= start_time) & (time <= end_time),
+                    "lon": lambda lon: (lon >= min_lon) & (lon <= max_lon),
+                    "lat": lambda lat: (lat >= min_lat) & (lat <= max_lat)
                 },
                 row_dim_name="traj"
             )
