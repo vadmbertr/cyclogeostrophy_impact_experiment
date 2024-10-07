@@ -5,9 +5,10 @@ applied to geostrophic Sea Surface Currents (SSC) derived from Sea Surface Heigh
 
 Geostrophic and cyclogeostrophic currents are computed using the package `jaxparrow` ([docs](https://jaxparrow.readthedocs.io/)).
 The impact is evaluated by computing geostrophic and cyclogeostrophic differences between the:
-- SSC and Eddy Kinetic Energy (EKE),
+- SSC, relative vorticity and Eddy Kinetic Energy (EKE),
 - cyclogeostrophic imbalance,
 - Euclidean distance between SSH derived SSC and drifters velocity.
+
 Those results are stored as datasets and some plots are produced automatically.
 
 One objective of this repo was to make the choice of the SSC inversion parameters and the input datasets 
