@@ -44,7 +44,7 @@ ssh_rename (dict, optional): Dictionary mapping SSH dataset original to new vari
 drifter_rename (dict, optional): Dictionary mapping drifter dataset original to new variables names.
     Defaults to None, which means no variables will be renamed.
 ssh_preproc (Callable, optional): Function(s) applied to preprocess the SSH data.
-    Defaults to ssh_lon_0_360_to_180_180_preproc_conf, which means longitudes are converted from [0, 360] to
+    Defaults to ssh_lon_to_180_180_preproc_conf, which means longitudes are converted from [0, 360] to
     [-180, 180].
 drifter_preproc (Callable, optional): Function(s) applied to preprocess the drifter data.
     Defaults to drifter_default_preproc_conf, which means default preprocessing is applied.
