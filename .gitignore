@@ -1,0 +1,19 @@
+# general
+.ipynb_checkpoints
+*.DS_Store
+**/__pycache__
+.env
+
+# data
+**/data/*
+**/run/*
+**/viz/*
+**/plot/*
+**/experiments/*
+**/outputs/*
+
+# IDE related
+.idea
+
+# git stuff
+!**/.gitkeep

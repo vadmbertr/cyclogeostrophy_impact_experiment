@@ -1,0 +1,20 @@
+cachier
+cartopy
+cgen
+clouddrift
+cmocean
+copernicusmarine
+# hydra
+hydra-zen
+jax
+jaxparrow
+jaxtyping
+matplotlib
+numpy
+psutil
+# pyinterp
+pymbolic
+python-dotenv
+s3fs
+toolz
+xarray
