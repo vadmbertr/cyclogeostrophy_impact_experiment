@@ -43,8 +43,8 @@ class CopernicusResource:
     def __init__(
             self,
             cms_dataset_id: str,
-            cms_username_env_var: str = "COPERNICUS_MARINE_SERVICE_USERNAME",
-            cms_password_env_var: str = "COPERNICUS_MARINE_SERVICE_PASSWORD",
+            cms_username_env_var: str = "COPERNICUSMARINE_SERVICE_USERNAME",
+            cms_password_env_var: str = "COPERNICUSMARINE_SERVICE_PASSWORD",
             disable_caching: bool = True
     ):
         if disable_caching:

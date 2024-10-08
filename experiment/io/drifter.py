@@ -4,12 +4,12 @@ from typing import Dict
 import clouddrift as cd
 import numpy as np
 
-from ._resource import CopernicusResource, Resource
+from ._resource import Resource
 from .ssh import SSHData
 
 
 class DrifterData:
-    def __init__(self, resource: CopernicusResource | Resource):
+    def __init__(self, resource: Resource):
         self.resource = resource
         self.dataset = None
 

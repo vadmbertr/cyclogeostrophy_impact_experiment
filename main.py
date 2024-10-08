@@ -39,13 +39,13 @@ class EnvVar(Callback):
     name="cyclogeostrophy_impact_experiment",
     hydra_defaults=[
         "_self_",
-        {"experiment_data": "s3"},
-        {"ssh_data": "s3"},
-        {"drifter_data": "s3"},
+        {"experiment_data": "local"},
+        {"ssh_data": "local"},
+        {"drifter_data": "local"},
     ]
 )
 def assess_cyclogeostrophy_impact(
-    experiment_data: ExperimentData,  # where and how experiment description and outputs are stored
+    experiment_data: ExperimentData,  # where and how experiment description and outputs are stored (i.e. local or s3)
     ssh_data: SSHData,  # input SSH data
     drifter_data: DrifterData,  # input drifter data
     ssh_rename: Dict[str, str] | None = None,  # dictionary mapping SSH dataset original to new variables names
