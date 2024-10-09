@@ -100,13 +100,13 @@ arguments to authenticate and connect to the bucket (see details in [Accessing s
 
 ### Examples
 
-Beside creating yaml configuration files for the experiments, `hydra-zen` allows to specify custom values for the 
+Beside creating yaml configuration files for the experiments, `hydra-zen` allows to specify custom values for the
 objects passed as arguments to the script with the syntax `object_group=entry_name`, 
 but also to their parameters with `object_group.arg=value` (not limited to one tree level).
 
 #### Pointing to input or output data
 
-For example, using the `local` configuration (which is the default) for `experiment_data`, `ssh_data` and `drifter_data` 
+For example, using the `local` configuration (which is the default) for `experiment_data`, `ssh_data` and `drifter_data`
 can be done with:
 
 ```shell
@@ -165,7 +165,7 @@ python main.py experiment_data=s3 experiment_data.filesystem.anon=False
     experiment_data.filesystem.endpoint_env_var='<YOUR_ENDPOINT_ENV_VAR_NAME>'
 ```
 
-See the `S3FileSystem` class definition in the module `experiment.io._filesystem.py` for details 
+See the `S3FileSystem` class definition in the module `experiment.io._filesystem.py` for details
 (as script parameters and directly linked to constructors arguments).
 
 #### Standard Python objects
@@ -179,7 +179,7 @@ python main.py ssh_data.resource.path='fullpath_to_ssh_file.zarr' drifter_data.r
 
 ### Input datasets requirements
 
-The SSH and drifters data are both expected to be `xarray` ([docs](https://docs.xarray.dev/)) readable file(s) 
+The SSH and drifters data are both expected to be `xarray` ([docs](https://docs.xarray.dev/)) readable file(s)
 such as `zarr` or `NetCDF` formats.
 By using the wildcard `*.nc`, several `NetCDF` files can be opened at once.
 
@@ -191,12 +191,12 @@ SSH datasets are then processed assuming that:
 - `longitude` range from -180 to 180,
 - Absolute Dynamic Topography (ADT) and Sea Level Anomaly (SLA) are encoded in meters in the variables `adt` and `sla`.
 
-To meet those requirements, one can use the parameter `ssh_rename` to rename the variables and dimensions, and add a 
+To meet those requirements, one can use the parameter `ssh_rename` to rename the variables and dimensions, and add a
 preprocessing step in the `experiment.preproc` module.
-Note the longitudes are automatically projected to [-180, 180] if provided in [0, 360] by using the transform 
+Note the longitudes are automatically projected to [-180, 180] if provided in [0, 360] by using the transform
 `(longitude + 180) % 360 - 180` which acts as the identity function if longitudes already range in [-180, 180].
 
-Drifters data are assumed to follow `clouddrift` ([docs](https://clouddrift.org/)) ragged-array format, 
+Drifters data are assumed to follow `clouddrift` ([docs](https://clouddrift.org/)) ragged-array format,
 meaning that they have:
 
 - `traj` and `obs` dimensions,
@@ -205,5 +205,5 @@ meaning that they have:
 - `lat` and `lon` are given in degrees,
 - `lon` range from -180 to 180,
 - `ve` and `vn` are in m/s,
-- for the default preprocessing steps to work, the variables `location_type`, `typebuoy` and `drogue_status` 
+- for the default preprocessing steps to work, the variables `location_type`, `typebuoy` and `drogue_status`
 must also be present.
