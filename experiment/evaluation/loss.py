@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 import jax
 import jax.numpy as jnp
 from jaxparrow.tools.kinematics import cyclogeostrophic_imbalance
@@ -7,23 +9,25 @@ from ..evaluation.interpolation import interpolate_grid
 
 
 def compute_loss_value_and_grad(
-        uv_fields: dict,
-        dx_u: Float[Array, "lat lon"],
-        dx_v: Float[Array, "lat lon"],
-        dy_u: Float[Array, "lat lon"],
-        dy_v: Float[Array, "lat lon"],
-        coriolis_factor_u: Float[Array, "lat lon"],
-        coriolis_factor_v: Float[Array, "lat lon"],
-        mask: Float[Array, "time lat lon"]
-) -> dict:
+    uv_fields: dict,
+    dx_u: Float[Array, "lat lon"],
+    dx_v: Float[Array, "lat lon"],
+    dy_u: Float[Array, "lat lon"],
+    dy_v: Float[Array, "lat lon"],
+    coriolis_factor_u: Float[Array, "lat lon"],
+    coriolis_factor_v: Float[Array, "lat lon"],
+    mask: Float[Array, "time lat lon"]
+) -> Dict[str, Tuple[np.ndarray, Dict[str, str]]]:
     def cyclo_loss_value_and_grad(
-            u_geos_u: Float[Array, "lat lon"], v_geos_v: Float[Array, "lat lon"], 
-            u_cyclo_u: Float[Array, "lat lon"], v_cyclo_v: Float[Array, "lat lon"], 
-            _mask: Float[Array, "lat lon"]
-    ) -> ((Float[Array, "lat lon"], Float[Array, "lat lon"]), (Float[Array, "lat lon"], Float[Array, "lat lon"])):
+        u_geos_u: Float[Array, "lat lon"], v_geos_v: Float[Array, "lat lon"], 
+        u_cyclo_u: Float[Array, "lat lon"], v_cyclo_v: Float[Array, "lat lon"], 
+        _mask: Float[Array, "lat lon"]
+    ) -> Tuple[
+        Tuple[Float[Array, "lat lon"], Float[Array, "lat lon"]], Tuple[Float[Array, "lat lon"], Float[Array, "lat lon"]]
+    ]:
         def cyclo_loss(
-                _uv_cyclo: (Float[Array, "lat lon"], Float[Array, "lat lon"])
-        ) -> (Float[Scalar, ""], (Float[Array, "lat lon"], Float[Array, "lat lon"])):
+                _uv_cyclo: Tuple[Float[Array, "lat lon"], Float[Array, "lat lon"]]
+        ) -> Tuple[Float[Scalar, ""], Tuple[Float[Array, "lat lon"], Float[Array, "lat lon"]]]:
             _u_cyclo_u, _v_cyclo_v = _uv_cyclo
 
             _imbalance_u, _imbalance_v = cyclogeostrophic_imbalance(

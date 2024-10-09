@@ -1,7 +1,9 @@
+from typing import Tuple
+
 import xarray as xr
 
 
-def _differences(ref: xr.DataArray, other: xr.DataArray) -> (xr.DataArray, xr.DataArray):
+def _differences(ref: xr.DataArray, other: xr.DataArray) -> Tuple[xr.DataArray, xr.DataArray]:
     abs_diff = other - ref
     rel_diff = 100 * abs_diff / other  # .where(other > 1e-3, 0)
     return abs_diff, rel_diff
@@ -12,7 +14,7 @@ def _compare(
     kinematics_ds: xr.Dataset,
     ref_method: str,
     method: str
-) -> (xr.Dataset, xr.Dataset):
+) -> Tuple[xr.Dataset, xr.Dataset]:
     abs_diff, rel_diff = _differences(kinematics_ds[f"u_{ref_method}"], kinematics_ds[f"u_{method}"])
     kinematics_ds[f"u_diff_{ref_method}_{method}"] = -abs_diff  # note the "-"
     kinematics_ds[f"u_diff_{ref_method}_{method}"].attrs = {
@@ -118,5 +120,5 @@ def _compare(
     return errors_ds, kinematics_ds
 
 
-def compare_methods(errors_ds: xr.Dataset, kinematics_ds: xr.Dataset) -> (xr.Dataset, xr.Dataset):
+def compare_methods(errors_ds: xr.Dataset, kinematics_ds: xr.Dataset) -> Tuple[xr.Dataset, xr.Dataset]:
     return _compare(errors_ds, kinematics_ds, ref_method="Cyclogeostrophy", method="Geostrophy")

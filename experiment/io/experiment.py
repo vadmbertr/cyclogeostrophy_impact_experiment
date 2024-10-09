@@ -5,9 +5,9 @@ from ._filesystem import FileSystem, LocalFileSystem
 
 class ExperimentData:
     def __init__(
-            self,
-            filesystem: FileSystem = LocalFileSystem(),
-            data_path: str = "experiments"
+        self,
+        filesystem: FileSystem = LocalFileSystem(),
+        data_path: str = "experiments"
     ):
         self.filesystem = filesystem
         self.root_path = data_path

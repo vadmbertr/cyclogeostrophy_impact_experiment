@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 import jax
 from jaxparrow.tools.kinematics import kinetic_energy, magnitude, normalized_relative_vorticity
 from jaxtyping import Array, Float
@@ -14,7 +16,7 @@ def compute_kinematics(
     lat_v: Float[Array, "lat lon"],
     lon_v: Float[Array, "lat lon"],
     mask: Float[Array, "time lat lon"]
-) -> dict:
+) -> Dict[str, Tuple[np.ndarray, Dict[str, str]]]:
     def nrv(u, v, m):
         return normalized_relative_vorticity(u, v, lat_u, lat_v, lon_u, lon_v, m)
 

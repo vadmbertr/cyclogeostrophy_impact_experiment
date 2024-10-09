@@ -8,6 +8,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.conf import HydraConf, JobConf
 from hydra.experimental.callback import Callback
 from hydra_zen import store, zen, make_custom_builds_fn
+import xarray as xr
 
 from experiment.evaluation._process import estimate_and_evaluate
 from experiment.evaluation.visualization import plot_fields
@@ -56,7 +57,8 @@ def assess_cyclogeostrophy_impact(
     temporal_extent: Tuple[str, str] | None = None,  # temporal domain window
     cyclogeostrophy_fun: Callable = cyclogeostrophy_conf,  # callable for the cyclogeostrophy, with parameters set
     bin_size: int = 1,  # bins size for the errors computed vs. the drifters data (in °)
-    save_all_times: bool = True,  # whether to save intermediate inversions
+    save_all_times: bool = True,  # whether to save variables at each time step
+    plot_all_times: bool = True,  # whether to plot variables at each time step
     memory_per_device: int = 35,  # available VRAM or RAM (in Gb)
     logger_level: int = logging.DEBUG  # logger outputs level
 ):
@@ -97,7 +99,9 @@ def assess_cyclogeostrophy_impact(
             parameters.
         bin_size (int, optional): Bin size in degrees (°) for error computations versus drifter data.
             Defaults to 1°.
-        save_all_times (bool, optional): Whether to save intermediate inversion results at each time step.
+        save_all_times (bool, optional): Whether to save variables at each time step.
+            Defaults to True.
+        plot_all_times (bool, optional): Whether to plot variables at each time step. Requires `save_all_times=True`.
             Defaults to True.
         memory_per_device (int, optional): Available VRAM or RAM per device in gigabytes (GB).
             Defaults to 35 GB.
@@ -155,7 +159,7 @@ def assess_cyclogeostrophy_impact(
         f"{int(drifter_data.dataset.obs.size)} observations"
     )
 
-    LOGGER.info("2. Estimating and evaluating SSC methods in mini-batch")
+    LOGGER.info("2. Estimating and evaluating SSC methods in mini-batch. This may take a while...")
     errors_ds, kinematics_ds = estimate_and_evaluate(
         experiment_data, experiment_config,
         drifter_data, ssh_data,
@@ -177,6 +181,13 @@ def assess_cyclogeostrophy_impact(
 
     LOGGER.info("4. Producing plots")
     plot_fields(errors_ds, kinematics_ds, experiment_data)
+    if save_all_times and plot_all_times:
+        LOGGER.info("4.1. Producing plots for all time steps. This may take a while...")
+        kinematics_ds_path = os.path.join(
+            experiment_data.experiment_path, experiment_data.results_dir, "all_times_kinematics.zarr"
+        )
+        kinematics_ds = xr.open_zarr(experiment_data.filesystem.get_path(kinematics_ds_path))
+        plot_fields(None, kinematics_ds, experiment_data, all_times=True)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 from collections.abc import Callable
 import math
 import os
+from typing import Dict, List, Tuple
 
 import clouddrift as cd
 import jax.numpy as jnp
@@ -20,7 +21,7 @@ from .loss import compute_loss_value_and_grad
 from .metrics import compute_along_traj_metrics, compute_binned_metrics
 
 
-def _estimate_batch_indices(n_time: int, n_lat: int, n_lon: int, memory_per_device: float) -> list:
+def _estimate_batch_indices(n_time: int, n_lat: int, n_lon: int, memory_per_device: float) -> List[int]:
     f32_size = 4  # mostly manipulate f32 arrays
     comp_mem_per_time = f32_size * n_lat * n_lon * 1e-9  # in Gb
     comp_mem_per_time *= 40  # empirical factor preventing OOM errors
@@ -48,7 +49,7 @@ def estimate_and_evaluate(
     bin_size: int,
     save_all_times: bool,
     memory_per_device: int
-) -> (xr.Dataset, xr.Dataset):
+) -> Tuple[xr.Dataset, xr.Dataset]:
     ssh_ds = ssh_data.dataset
 
     # fix over batches
@@ -132,14 +133,14 @@ def _estimate_ssc(
     ssh_t: Float[Array, "time lat lon"],
     lat_t: Float[Array, "lat lon"],
     lon_t: Float[Array, "lat lon"]
-) -> (
-    dict,
+) -> Tuple[
+    Dict[str, Tuple[np.ndarray, np.ndarray]],
     Float[Array, "lat lon"],
     Float[Array, "lat lon"],
     Float[Array, "lat lon"],
     Float[Array, "lat lon"],
     Float[Array, "time lat lon"]
-):
+]:
     mask = ~np.isfinite(ssh_t)
     u_cyclo, v_cyclo, u_geos, v_geos, lat_u, lon_u, lat_v, lon_v = cyclogeostrophy_fun(lat_t, lon_t, ssh_t, mask)
 
@@ -195,7 +196,7 @@ def process_batch(
     save_all_times: bool,
     experiment_data: ExperimentData,
     experiment_config: str
-) -> (xr.Dataset, xr.Dataset, xr.Dataset, xr.Dataset, np.ndarray):
+) -> Tuple[xr.Dataset, xr.Dataset, xr.Dataset, xr.Dataset, np.ndarray]:
     LOGGER.info("2.i.1. Estimating SSC - mini-batch")
     adt_t = ssh_ds.adt.isel(time=slice(idx0, idx1)).values
     uv_fields, lat_u, lon_u, lat_v, lon_v, mask = _estimate_ssc(cyclogeostrophy_fun, adt_t, lat_t, lon_t)
@@ -246,7 +247,7 @@ def process_batch(
     kinematics_ds = kinematics_ds.where(~mask)
 
     LOGGER.info("2.i.7. Comparing methods - mini-batch")
-    _, kinematics_ds = compare_methods(None, kinematics_ds)  # noqa
+    _, kinematics_ds = compare_methods(None, kinematics_ds)
     kinematics_ds.attrs["experiment_config"] = experiment_config
 
     if save_all_times:
@@ -254,10 +255,10 @@ def process_batch(
         kinematics_path = os.path.join(
             experiment_data.experiment_path, experiment_data.results_dir, "all_times_kinematics.zarr"
         )
-        if experiment_data.filesystem.exists(kinematics_path):  # noqa
-            kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path), append_dim="time")  # noqa
+        if experiment_data.filesystem.exists(kinematics_path):
+            kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path), append_dim="time")
         else:
-            kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path))  # noqa
+            kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path))
 
     LOGGER.info("2.i.9. Summing along time - mini-batch")
     kinematics_sum_ds = kinematics_ds.sum(dim="time", skipna=True, keep_attrs=True)

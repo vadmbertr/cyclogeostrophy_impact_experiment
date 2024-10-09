@@ -41,11 +41,11 @@ class URLResource(Resource):
 
 class CopernicusResource:
     def __init__(
-            self,
-            cms_dataset_id: str,
-            cms_username_env_var: str = "COPERNICUSMARINE_SERVICE_USERNAME",
-            cms_password_env_var: str = "COPERNICUSMARINE_SERVICE_PASSWORD",
-            disable_caching: bool = True
+        self,
+        cms_dataset_id: str,
+        cms_username_env_var: str = "COPERNICUSMARINE_SERVICE_USERNAME",
+        cms_password_env_var: str = "COPERNICUSMARINE_SERVICE_PASSWORD",
+        disable_caching: bool = True
     ):
         if disable_caching:
             cachier.disable_caching()

@@ -30,9 +30,9 @@ def unpad(pad_with: int, arrs: List[Float[Array, "time lat lon"]]) -> List[Float
 
 
 def pad_wrapper(
-        n_batches: int,
-        f: Callable,
-        arrs: List[Float[Array, "time lat lon"]]
+    n_batches: int,
+    f: Callable,
+    arrs: List[Float[Array, "time lat lon"]]
 ) -> List[Float[Array, "time lat lon"]]:
     pad_arrs, pad_with = pad(n_batches, arrs)
     pad_res = f(*pad_arrs)

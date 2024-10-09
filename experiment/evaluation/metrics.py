@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import numpy as np
 import pyinterp
 import xarray as xr
@@ -6,7 +8,7 @@ import xarray as xr
 def _euclidean_dist(
     u: xr.DataArray, u_hat: xr.DataArray,
     v: xr.DataArray, v_hat: xr.DataArray
-) -> (xr.DataArray, xr.DataArray, xr.DataArray):
+) -> Tuple[xr.DataArray, xr.DataArray, xr.DataArray]:
     err_u = (u_hat - u)**2
     err_v = (v_hat - v)**2
     err_uv = (err_u + err_v)**.5
@@ -15,7 +17,7 @@ def _euclidean_dist(
     return err_u, err_v, err_uv
 
 
-def compute_along_traj_metrics(drifter_ds: xr.Dataset, methods: []) -> xr.Dataset:
+def compute_along_traj_metrics(drifter_ds: xr.Dataset, methods: List[str]) -> xr.Dataset:
     traj_metrics = drifter_ds
     for method in methods:
         traj_metrics[f"err_u_{method}"], traj_metrics[f"err_v_{method}"], traj_metrics[f"err_{method}"] = (
@@ -29,9 +31,9 @@ def compute_along_traj_metrics(drifter_ds: xr.Dataset, methods: []) -> xr.Datase
 def compute_binned_metrics(
     field_ds: xr.Dataset,
     traj_metrics: xr.Dataset,
-    methods: [],
+    methods: List[str],
     bin_size: int
-) -> (xr.Dataset, xr.Dataset):
+) -> Tuple[xr.Dataset, xr.Dataset]:
     latitude = np.arange(field_ds.latitude.min(), field_ds.latitude.max(), bin_size)
     longitude = np.arange(field_ds.longitude.min(), field_ds.longitude.max(), bin_size)
 
