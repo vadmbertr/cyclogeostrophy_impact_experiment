@@ -1,26 +1,29 @@
 # Project description
 
-The aim of this repo is to facilitate the launch of experiments assessing the impact of cyclogeostrophic corrections 
+The aim of this repo is to facilitate the launch of experiments assessing the impact of cyclogeostrophic corrections
 applied to geostrophic Sea Surface Currents (SSC) derived from Sea Surface Height (SSH) data.
 
 Geostrophic and cyclogeostrophic currents are computed using the package `jaxparrow` ([docs](https://jaxparrow.readthedocs.io/)).
 The impact is evaluated by computing geostrophic and cyclogeostrophic differences between the:
+
 - SSC, relative vorticity and Eddy Kinetic Energy (EKE),
 - cyclogeostrophic imbalance,
 - Euclidean distance between SSH derived SSC and drifters velocity.
 
 Those results are stored as datasets and some plots are produced automatically.
 
-One objective of this repo was to make the choice of the SSC inversion parameters and the input datasets 
+One objective of this repo was to make the choice of the SSC inversion parameters and the input datasets
 as flexible as possible, while keeping a clear track of the values used for each experiment.
 For this it uses the `hydra` and `hydra-zen` libraries ([docs](https://mit-ll-responsible-ai.github.io/hydra-zen/)).
 
 ## Installation
 
 Assuming `conda` is installed, running:
+
 ```shell
 ./depencies.sh
 ```
+
 will create a `conda` environment and install the required dependencies.
 
 ## Usage
@@ -28,10 +31,13 @@ will create a `conda` environment and install the required dependencies.
 Thanks to `hydra-zen`, experiments are launched as a Python script.
 
 Running:
+
 ```shell
 python main.py --help
 ```
+
 will provide `hydra-zen` formatted details about the experiment parameters:
+
 ```
 experiment_data (ExperimentData): Object representing the file system and structure where experiment descriptions and
     outputs are saved. It can be a local filesystem, but also a s3 bucket.
@@ -56,7 +62,9 @@ cyclogeostrophy_fun (Callable, optional): Function for cyclogeostrophy computati
     Defaults to `cyclogeostrophy_conf`, which implies the use of the default `jaxparrow.cyclogeostrophy` parameters.
 bin_size (int, optional): Bin size in degrees (°) for error computations versus drifter data.
     Defaults to 1°.
-save_all_times (bool, optional): Whether to save intermediate inversion results at each time step.
+save_all_times (bool, optional): Whether to save variables at each time step.
+    Defaults to True.
+plot_all_times (bool, optional): Whether to plot variables at each time step. Requires `save_all_times=True`.
     Defaults to True.
 memory_per_device (int, optional): Available VRAM or RAM per device in gigabytes (GB).
     Defaults to 35 GB.
@@ -64,30 +72,31 @@ logger_level (int, optional): Logging output level (e.g., `logging.DEBUG`, `logg
     Defaults to `logging.DEBUG`.
 ```
 
-See [Examples](###Examples) for ready-to-use launch commands.
+See [Examples](#examples) for ready-to-use launch commands.
 
 ### Main objects types and classes
 
 Experiments descriptions and results storage is represented by the class `experiment.io.experiement.ExperimentData`.
 Its constructor takes as arguments:
+
 - a `FileSystem` object,
 - a `string` indicating the path on this filesystem to the root directory of the experiment outputs.
 
 How to access input datasets is described by the class `experiment.io._resource.Resource` and its subclasses.
-The subclasses allow specifying where the resource is accessed: on a local filesystem (`LocalResource`), 
-on the "cloud" (`URLResource`), on a s3 bucket (`S3Resource`), or through a specific provider 
+The subclasses allow specifying where the resource is accessed: on a local filesystem (`LocalResource`),
+on the "cloud" (`URLResource`), on a s3 bucket (`S3Resource`), or through a specific provider
 (Copernicus Marine Service: `CopernicusResource` or CloudDrift: `CloudDriftResource`).
 `LocalResource` and `URLResource` take as argument a single `string` representing the `path` (or the URL)
  to the dataset(s).
 `S3Resource` also takes a `path` as argument, plus a `S3FileSystem` object allowing to access the s3 bucket.
-`CopernicusResource` does not have a `path` argument, but several `string` describing the targeted dataset 
-and how to connect to the Copernicus Marine Service datastore. 
-See details in [Pointing to input or output data](####Pointing-to-input-or-output-data).
+`CopernicusResource` does not have a `path` argument, but several `string` describing the targeted dataset
+and how to connect to the Copernicus Marine Service datastore.
+See details in [Pointing to input or output data](#pointing-to-input-or-output-data).
 
-Finally, a filesystem is represented by the `experiment.io._filesystem.FileSystem` class and subclasses: 
+Finally, a filesystem is represented by the `experiment.io._filesystem.FileSystem` class and subclasses:
 `LocalFileSystem` for local filesystem, and `S3FileSystem` for s3 buckets.
-Local filesystems objects constructor do not have any argument, while the `S3FileSystem` constructor takes several 
-arguments to authenticate and connect to the bucket (see details in [Accessing s3 buckets](####Accessing-s3-buckets)).
+Local filesystems objects constructor do not have any argument, while the `S3FileSystem` constructor takes several
+arguments to authenticate and connect to the bucket (see details in [Accessing s3 buckets](#accessing-s3-buckets)).
 
 ### Examples
 
@@ -99,16 +108,20 @@ but also to their parameters with `object_group.arg=value` (not limited to one t
 
 For example, using the `local` configuration (which is the default) for `experiment_data`, `ssh_data` and `drifter_data` 
 can be done with:
+
 ```shell
 python main.py experiment_data=local ssh_data=local drifter_data=local
 ```
+
 And prescribing the local `path` of the `ssh_data` or `drifter_data` `resource` is achieved with:
+
 ```shell
 python main.py experiment_data=local ssh_data=local drifter_data=local 
   ssh_data.resource.path='fullpath_to_ssh_file.zarr' drifter_data.resource.path='fullpath_to_drifter_file.zarr'
 ```
 
 It is also possible to access data from URLs as if the resource was stored locally:
+
 ```shell
 python main.py experiment_data=local ssh_data=local drifter_data=local 
   ssh_data.resource.path='https://url_to_ssh_file.zarr' drifter_data.resource.path='fullpath_to_drifter_file.zarr'
@@ -117,30 +130,36 @@ python main.py experiment_data=local ssh_data=local drifter_data=local
 #### Accessing s3 buckets
 
 s3 buckets can be read and write by using the `s3` entry of the `experiment_data`, `ssh_data` and `drifter_data` groups:
+
 ```shell
 python main.py experiment_data=s3 ssh_data=s3 drifter_data=s3
 ```
 
 Public buckets can be accessed by setting the `anon` argument to the `S3FileSystem` constructor to `True` using:
+
 ```shell
 python main.py ssh_data=s3 drifter_data=s3 ssh_data.resource.s3_fs.anon=True drifter_data.resource.s3_fs.anon=True
 ```
 
-For private buckets (`anon=False`, which is the default) the application assumes that the credentials used are stored 
+For private buckets (`anon=False`, which is the default) the application assumes that the credentials used are stored
 in environment variables.
 Again, the key of those environment variables can be changed using for example:
+
 ```shell
 python main.py experiment_data=s3 experiment_data.filesystem.anon=False 
     experiment_data.filesystem.key_env_var='<YOUR_KEY_ENV_VAR_NAME>'
 ```
 
-s3 buckets have `endpoint` (`minio.lab.dive.edito.eu` for EDITO s3 for example) that should also be specified, 
+s3 buckets have `endpoint` (`minio.lab.dive.edito.eu` for EDITO s3 for example) that should also be specified,
 either from the command line:
+
 ```shell
 python main.py experiment_data=s3 experiment_data.filesystem.anon=False 
     experiment_data.filesystem.endpoint='<YOUR_S3_ENDPOINT>'
 ```
+
 Or from an environment variable, named `AWS_S3_ENDPOINT` by default, but that you can override:
+
 ```shell
 python main.py experiment_data=s3 experiment_data.filesystem.anon=False 
     experiment_data.filesystem.endpoint_env_var='<YOUR_ENDPOINT_ENV_VAR_NAME>'
@@ -152,6 +171,7 @@ See the `S3FileSystem` class definition in the module `experiment.io._filesystem
 #### Standard Python objects
 
 Python objects such as `list` or `dict` can be passed as:
+
 ```shell
 python main.py ssh_data.resource.path='fullpath_to_ssh_file.zarr' drifter_data.resource.path='fullpath_to_drifter_file.zarr'
   spatial_extent='[-60, -50, 25, 35]' temporal_extent='["2023-08-01", "2023-08-02"]'
@@ -164,6 +184,7 @@ such as `zarr` or `NetCDF` formats.
 By using the wildcard `*.nc`, several `NetCDF` files can be opened at once.
 
 SSH datasets are then processed assuming that:
+
 - dimensions names are `time`, `latitude`, `longitude`,
 - `time` is expressed in (nano)seconds since epoch,
 - `latitude` and `longitude` are given in degrees,
@@ -177,6 +198,7 @@ Note the longitudes are automatically projected to [-180, 180] if provided in [0
 
 Drifters data are assumed to follow `clouddrift` ([docs](https://clouddrift.org/)) ragged-array format, 
 meaning that they have:
+
 - `traj` and `obs` dimensions,
 - at least `lat`, `lon`, `time`, `ve` and `vn` variables,
 - `time` is expressed in (nano)seconds since epoch,
