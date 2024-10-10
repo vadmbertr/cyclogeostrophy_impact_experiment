@@ -81,8 +81,8 @@ def _save_fig(
 
     if all_times:
         for time in da.time:
-            time = str(time.values)[:-10]
-            save_fig(da.sel(time=time), f"{data_var}_{time}.pdf", time)
+            time_str = str(time.values)[:-10]
+            save_fig(da.sel(time=time), f"{data_var}_{time_str}.pdf", time_str)
     else:
         save_fig(da, f"{data_var}.pdf")
 
@@ -140,8 +140,8 @@ def _plot_kinematics(
     else:
         vmax_fn = lambda f, v, apply_abs=False: _get_quantile(f, v, quantile, apply_abs)
 
-    u_max = vmax_fn(kinematics_ds, u_vars)
-    v_max = vmax_fn(kinematics_ds, v_vars)
+    u_max = vmax_fn(kinematics_ds, u_vars, apply_abs=True)
+    v_max = vmax_fn(kinematics_ds, v_vars, apply_abs=True)
     magn_max = vmax_fn(kinematics_ds, magn_vars)
     nrv_max = vmax_fn(kinematics_ds, nrv_vars, apply_abs=True)
     eke_max = vmax_fn(kinematics_ds, eke_vars)
