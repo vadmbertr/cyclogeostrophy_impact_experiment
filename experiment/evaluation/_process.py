@@ -255,13 +255,21 @@ def process_batch(
         kinematics_path = os.path.join(
             experiment_data.experiment_path, experiment_data.results_dir, "all_times_kinematics.zarr"
         )
+        kinematics_all_times_ds = kinematics_ds.copy(deep=False)
+        all_times_var_names = {
+            var_name: var_name.replace("\\langle ", "").replace(" \\rangle", "")  # not averaged
+            for var_name in kinematics_all_times_ds.data_vars
+        }
+        kinematics_all_times_ds.rename_vars(all_times_var_names)
         if experiment_data.filesystem.exists(kinematics_path):
-            kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path), append_dim="time")
+            kinematics_all_times_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path), append_dim="time")
         else:
-            kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path))
+            kinematics_all_times_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path))
+        del kinematics_all_times_ds
 
     LOGGER.info("2.i.9. Summing along time - mini-batch")
-    kinematics_sum_ds = kinematics_ds.sum(dim="time", skipna=True, keep_attrs=True)
+    with xr.set_options(keep_attrs=True):
+        kinematics_sum_ds = kinematics_ds.sum(dim="time", skipna=True, keep_attrs=True)
     kinematics_count_ds = xr.apply_ufunc(np.isfinite, kinematics_ds).sum(dim="time")
     mask = np.any(mask, axis=0)
     del kinematics_ds

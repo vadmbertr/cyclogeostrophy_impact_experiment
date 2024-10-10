@@ -29,24 +29,24 @@ def compute_kinematics(
         uv = uv_fields[method]
         kinematics_vars[f"u_{method}"] = (
             interpolate_grid(uv[0], mask, axis=1, padding="left"),
-            {"method": method, "what": "$u$", "units": "$m/s$"}
+            {"method": method, "what": "$\\langle u \\rangle$", "units": "$m/s$"}
         )
         kinematics_vars[f"v_{method}"] = (
             interpolate_grid(uv[1], mask, axis=0, padding="left"),
-            {"method": method, "what": "$v$", "units": "$m/s$"}
+            {"method": method, "what": "$\\langle v \\rangle$", "units": "$m/s$"}
         )
         kinematics_vars[f"magn_{method}"] = (
             np.array(vmap_magn(*uv), dtype=np.float32),
-            {"method": method, "what": "$\\| \\mathbf{u} \\|$", "units": "$m/s$"}
+            {"method": method, "what": "$\\langle \\| \\mathbf{u} \\| \\rangle$", "units": "$m/s$"}
         )
         kinematics_vars[f"nrv_{method}"] = (
             np.array(vmap_nrv(*uv, mask), dtype=np.float32),
-            {"method": method, "what": "$\\xi/f$", "units": ""}
+            {"method": method, "what": "$\\langle \\xi/f \\rangle$", "units": ""}
         )
 
         kinematics_vars[f"eke_{method}"] = (
             np.array(vmap_ke(*uva_fields[method], mask), dtype=np.float32),
-            {"method": method, "what": "$\\text{EKE}$", "units": "$(m/s)^2$"}
+            {"method": method, "what": "$\\langle \\text{EKE} \\rangle$", "units": "$(m/s)^2$"}
         )
 
     return kinematics_vars
