@@ -17,7 +17,7 @@ def compute_loss_value_and_grad(
     coriolis_factor_u: Float[Array, "lat lon"],
     coriolis_factor_v: Float[Array, "lat lon"],
     mask: Float[Array, "time lat lon"]
-) -> Dict[str, Tuple[np.ndarray, Dict[str, str]]]:
+) -> Dict[str, Tuple[jnp.ndarray, Dict[str, str]]]:
     def cyclo_loss_value_and_grad(
         u_geos_u: Float[Array, "lat lon"], v_geos_v: Float[Array, "lat lon"], 
         u_cyclo_u: Float[Array, "lat lon"], v_cyclo_v: Float[Array, "lat lon"], 
