@@ -193,7 +193,7 @@ SSH datasets are then processed assuming that:
 
 To meet those requirements, one can use the parameter `ssh_rename` to rename the variables and dimensions, and add a
 preprocessing step in the `experiment.preproc` module.
-Note the longitudes are automatically projected to [-180, 180] if provided in [0, 360] by using the transform
+Note that the longitudes are automatically projected to [-180, 180] if provided in [0, 360] by using the transform
 `(longitude + 180) % 360 - 180` which acts as the identity function if longitudes already range in [-180, 180].
 
 Drifters data are assumed to follow `clouddrift` ([docs](https://clouddrift.org/)) ragged-array format,
