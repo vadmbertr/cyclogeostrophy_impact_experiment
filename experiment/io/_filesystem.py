@@ -35,11 +35,11 @@ class S3FileSystem(FileSystem):
             endpoint = os.environ[endpoint_env_var]
 
         kwargs = {"anon": anon, "endpoint_url": f"https://{endpoint}"}
-        if os.environ.get(key_env_var) is not None:
+        if os.environ.get(key_env_var):
             kwargs["key"] = os.environ[key_env_var]
-        if os.environ.get(secret_env_var) is not None:
+        if os.environ.get(secret_env_var):
             kwargs["secret"] = os.environ[secret_env_var]
-        if os.environ.get(token_env_var) is not None:
+        if os.environ.get(token_env_var):
             kwargs["token"] = os.environ[token_env_var]
 
         self._fs = s3fs.S3FileSystem(**kwargs)
