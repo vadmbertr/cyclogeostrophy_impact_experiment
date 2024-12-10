@@ -38,7 +38,7 @@ python main.py --help
 
 will provide `hydra-zen` formatted details about the experiment parameters:
 
-```
+```text
 experiment_data (ExperimentData): Object representing the file system and structure where experiment descriptions and
     outputs are saved. It can be a local filesystem, but also a s3 bucket.
 ssh_data (SSHData): Object representing the input SSH data. It can be only a path to the data file(s) on a local 
@@ -101,10 +101,12 @@ arguments to authenticate and connect to the bucket (see details in [Accessing s
 ### Examples
 
 Beside creating yaml configuration files for the experiments, `hydra-zen` allows to specify custom values for the
-objects passed as arguments to the script with the syntax `object_group=entry_name`, 
+objects passed as arguments to the script with the syntax `object_group=entry_name`,
 but also to their parameters with `object_group.arg=value` (not limited to one tree level).
 
 #### Pointing to input or output data
+
+##### Local or URL data
 
 For example, using the `local` configuration (which is the default) for `experiment_data`, `ssh_data` and `drifter_data`
 can be done with:
@@ -127,7 +129,7 @@ python main.py experiment_data=local ssh_data=local drifter_data=local
   ssh_data.resource.path='https://url_to_ssh_file.zarr' drifter_data.resource.path='fullpath_to_drifter_file.zarr'
 ```
 
-#### Accessing s3 buckets
+##### s3 buckets
 
 s3 buckets can be read and write by using the `s3` entry of the `experiment_data`, `ssh_data` and `drifter_data` groups:
 
@@ -167,6 +169,14 @@ python main.py experiment_data=s3 experiment_data.filesystem.anon=False
 
 See the `S3FileSystem` class definition in the module `experiment.io._filesystem.py` for details
 (as script parameters and directly linked to constructors arguments).
+
+##### copernicusmarine API
+
+`ssh_data` can be read using `copernicusmarine` API:
+
+```shell
+python main.py ssh_data=copernicus ssh_data.resource.cms_dataset_id='<THE_DATASET_ID>'
+```
 
 #### Standard Python objects
 
