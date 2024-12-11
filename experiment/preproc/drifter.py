@@ -1,5 +1,6 @@
 import clouddrift as cd
 import numpy as np
+from scipy import signal
 import xarray as xr
 
 
@@ -9,7 +10,8 @@ DEFAULT_STEPS = (
     "drogued_only",
     "remove_low_latitudes",
     "finite_value_only",
-    "remove_outlier_values"
+    "remove_outlier_values",
+    "apply_low_pass_filter"
 )
 
 
@@ -38,14 +40,14 @@ def remove_low_latitudes(ds: xr.Dataset, cutoff: float = 5) -> xr.Dataset:
 
 
 def finite_value_only(ds: xr.Dataset) -> xr.Dataset:
-    ds.lat.load()
-    ds = cd.ragged.subset(ds, {"lat": np.isfinite}, row_dim_name="traj")
     ds.lon.load()
     ds = cd.ragged.subset(ds, {"lon": np.isfinite}, row_dim_name="traj")
-    ds.vn.load()
-    ds = cd.ragged.subset(ds, {"vn": np.isfinite}, row_dim_name="traj")
+    ds.lat.load()
+    ds = cd.ragged.subset(ds, {"lat": np.isfinite}, row_dim_name="traj")
     ds.ve.load()
     ds = cd.ragged.subset(ds, {"ve": np.isfinite}, row_dim_name="traj")
+    ds.vn.load()
+    ds = cd.ragged.subset(ds, {"vn": np.isfinite}, row_dim_name="traj")
     ds.time.load()
     ds = cd.ragged.subset(ds, {"time": lambda arr: ~np.isnat(arr)}, row_dim_name="traj")
     return ds
@@ -55,8 +57,25 @@ def remove_outlier_values(ds: xr.Dataset, cutoff: float = 10) -> xr.Dataset:
     def velocity_cutoff(arr: xr.DataArray) -> xr.DataArray:
         return np.abs(arr) <= cutoff
 
-    ds.vn.load()
-    ds = cd.ragged.subset(ds, {"vn": velocity_cutoff}, row_dim_name="traj")
     ds.ve.load()
     ds = cd.ragged.subset(ds, {"ve": velocity_cutoff}, row_dim_name="traj")
+    ds.vn.load()
+    ds = cd.ragged.subset(ds, {"vn": velocity_cutoff}, row_dim_name="traj")
+    return ds
+
+
+def apply_low_pass_filter(ds: xr.Dataset, cutoff: float = 48*3600, order: int = 8) -> xr.Dataset:
+    def butterworth_low_pass(u: xr.DataArray, v: xr.DataArray) -> (np.ndarray, np.ndarray):
+        normalized_cutoff = 2 * dt / cutoff
+        sos = signal.butter(order, normalized_cutoff, btype="low", analog=False, output="sos")
+        U = signal.sosfiltfilt(sos, u + 1j * v)
+        return U.real, U.imag
+    
+    dt = (ds.time[1] - ds.time[0]).seconds
+
+    ve, vn  = cd.ragged.apply_ragged(butterworth_low_pass, (ds.ve, ds.vn), row_dim_name="traj")
+
+    ds["ve"] = ds["ve"].copy(data=ve)
+    ds["vn"] = ds["vn"].copy(data=vn)
+
     return ds
