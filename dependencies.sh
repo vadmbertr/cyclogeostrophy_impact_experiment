@@ -5,7 +5,7 @@ eval "$(command conda "shell.zsh" "hook" 2> /dev/null)"
 
 conda env create -f environment.yml
 conda activate cyclogeostrophy_impact_experiment
+conda install pyinterp -c conda-forge
 pip install --upgrade pip
-conda install conda-forge::pyinterp
 pip install -r requirements.txt --upgrade
 # pip install -U "jax[cuda12]"  # uncomment this to install a cuda version of JAX
