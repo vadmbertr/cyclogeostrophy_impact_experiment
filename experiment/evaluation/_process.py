@@ -184,6 +184,27 @@ def _loss_to_dataset(kinematics_ds: xr.Dataset, loss_vars: dict) -> xr.Dataset:
     return kinematics_ds.assign(**data_vars)
 
 
+def _save_all_times_dataset(
+    ds: xr.Dataset, 
+    experiment_data: ExperimentData, 
+    ds_name: str
+) -> None:
+    all_times_path = os.path.join(
+        experiment_data.experiment_path, experiment_data.results_dir, f"all_times_{ds_name}.zarr"
+    )
+    all_times_ds = ds.copy(deep=False)
+    all_times_var_names = {
+        var_name: var_name.replace("\\langle ", "").replace(" \\rangle", "")  # not averaged
+        for var_name in all_times_ds.data_vars
+    }
+    all_times_ds.rename_vars(all_times_var_names)
+    if experiment_data.filesystem.exists(all_times_path):
+        all_times_ds.to_zarr(experiment_data.filesystem.get_path(all_times_path), append_dim="time")
+    else:
+        all_times_ds.to_zarr(experiment_data.filesystem.get_path(all_times_path))
+    del all_times_ds
+
+
 def process_batch(
     idx0: int,
     idx1: int,
@@ -233,6 +254,8 @@ def process_batch(
         del drifter_batch
         LOGGER.info("2.i.4.2. Computing binned metrics - mini-batch")
         errors_sum_ds, errors_count_ds = compute_binned_metrics(ssh_ds, traj_metrics, uv_fields.keys(), bin_size)
+        errors_sum_ds.attrs["experiment_config"] = experiment_config
+        errors_count_ds.attrs["experiment_config"] = experiment_config
         del traj_metrics
     else:
         errors_sum_ds, errors_count_ds = None, None
@@ -251,21 +274,10 @@ def process_batch(
     kinematics_ds.attrs["experiment_config"] = experiment_config
 
     if save_all_times:
-        LOGGER.info("2.i.8. Saving dataset - mini-batch")
-        kinematics_path = os.path.join(
-            experiment_data.experiment_path, experiment_data.results_dir, "all_times_kinematics.zarr"
-        )
-        kinematics_all_times_ds = kinematics_ds.copy(deep=False)
-        all_times_var_names = {
-            var_name: var_name.replace("\\langle ", "").replace(" \\rangle", "")  # not averaged
-            for var_name in kinematics_all_times_ds.data_vars
-        }
-        kinematics_all_times_ds.rename_vars(all_times_var_names)
-        if experiment_data.filesystem.exists(kinematics_path):
-            kinematics_all_times_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path), append_dim="time")
-        else:
-            kinematics_all_times_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_path))
-        del kinematics_all_times_ds
+        LOGGER.info("2.i.8. Saving datasets - mini-batch")
+        _save_all_times_dataset(errors_sum_ds, experiment_data, "errors_sum")
+        _save_all_times_dataset(errors_count_ds, experiment_data, "errors_count")
+        _save_all_times_dataset(kinematics_ds, experiment_data, "kinematics")
 
     LOGGER.info("2.i.9. Summing along time - mini-batch")
     with xr.set_options(keep_attrs=True):
