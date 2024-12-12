@@ -284,7 +284,7 @@ def process_batch(
         LOGGER.info("2.i.8. Saving datasets - mini-batch")
         _save_all_times_dataset(errors_sum_ds, experiment_data, "errors_sum")
         _save_all_times_dataset(errors_count_ds, experiment_data, "errors_count")
-        _save_all_times_dataset(kinematics_ds, experiment_data, "kinematics")
+        _save_all_times_dataset(kinematics_ds, experiment_data, "kinematics", append=True)
 
     LOGGER.info("2.i.9. Summing along time - mini-batch")
     with xr.set_options(keep_attrs=True):
