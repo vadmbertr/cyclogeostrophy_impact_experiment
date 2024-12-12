@@ -187,7 +187,8 @@ def _loss_to_dataset(kinematics_ds: xr.Dataset, loss_vars: dict) -> xr.Dataset:
 def _save_all_times_dataset(
     ds: xr.Dataset, 
     experiment_data: ExperimentData, 
-    ds_name: str
+    ds_name: str,
+    append: bool = False
 ) -> None:
     all_times_path = os.path.join(
         experiment_data.experiment_path, experiment_data.results_dir, f"all_times_{ds_name}.zarr"
@@ -199,7 +200,13 @@ def _save_all_times_dataset(
     }
     all_times_ds.rename_vars(all_times_var_names)
     if experiment_data.filesystem.exists(all_times_path):
-        all_times_ds.to_zarr(experiment_data.filesystem.get_path(all_times_path), append_dim="time")
+        if append:
+            all_times_ds.to_zarr(experiment_data.filesystem.get_path(all_times_path), append_dim="time")
+        else:
+            all_times_ds_ = xr.open_zarr(experiment_data.filesystem.get_path(all_times_path))
+            for var in all_times_ds_.data_vars:
+                all_times_ds_[var] += all_times_ds[var]
+            all_times_ds_.to_zarr(experiment_data.filesystem.get_path(all_times_path), mode="r+")
     else:
         all_times_ds.to_zarr(experiment_data.filesystem.get_path(all_times_path))
     del all_times_ds
