@@ -34,8 +34,8 @@ def compute_binned_metrics(
     methods: List[str],
     bin_size: int
 ) -> Tuple[xr.Dataset, xr.Dataset]:
-    latitude = np.arange(field_ds.latitude.min(), field_ds.latitude.max(), bin_size)
-    longitude = np.arange(field_ds.longitude.min(), field_ds.longitude.max(), bin_size)
+    latitude = np.arange(field_ds.latitude.min(), field_ds.latitude.max(), bin_size) + bin_size / 2
+    longitude = np.arange(field_ds.longitude.min(), field_ds.longitude.max(), bin_size) + bin_size / 2
 
     binning = pyinterp.Binning2D(pyinterp.Axis(longitude + 180, is_circle=True), pyinterp.Axis(latitude))
 

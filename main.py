@@ -56,7 +56,7 @@ def assess_cyclogeostrophy_impact(
     spatial_extent: Tuple[float, float, float, float] | None = None,  # spatial domain bounding box ([lon0, lon1, lat0, lat1])
     temporal_extent: Tuple[str, str] | None = None,  # temporal domain window
     cyclogeostrophy_fun: Callable = cyclogeostrophy_conf,  # callable for the cyclogeostrophy, with parameters set
-    bin_size: int = 1,  # bins size for the errors computed vs. the drifters data (in °)
+    bin_size: float = 1.,  # bins size for the errors computed vs. the drifters data (in °)
     save_all_times: bool = True,  # whether to save variables at each time step
     plot_all_times: bool = True,  # whether to plot variables at each time step
     memory_per_device: int = 35,  # available VRAM or RAM (in Gb)

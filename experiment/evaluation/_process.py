@@ -116,8 +116,8 @@ def estimate_and_evaluate(
     LOGGER.info("2.N.2. Comparing methods")
     errors_ds, kinematics_ds = compare_methods(errors_ds, kinematics_ds)
 
-    LOGGER.info("2.N.3. Adding mean SSH")
-    kinematics_ds = _add_ssh(kinematics_ds, ssh_ds)
+    # LOGGER.info("2.N.3. Adding mean SSH")
+    # kinematics_ds = _add_ssh(kinematics_ds, ssh_ds)
 
     LOGGER.info("2.N.4. Applying spatial mask")
     kinematics_ds = kinematics_ds.where(~mask)
@@ -276,14 +276,15 @@ def process_batch(
     kinematics_ds = _loss_to_dataset(kinematics_ds, loss_vars)
     kinematics_ds = kinematics_ds.where(~mask)
 
-    LOGGER.info("2.i.7. Comparing methods - mini-batch")
-    _, kinematics_ds = compare_methods(None, kinematics_ds)
+    # LOGGER.info("2.i.7. Comparing methods - mini-batch")
+    # _, kinematics_ds = compare_methods(None, kinematics_ds)
+    
     kinematics_ds.attrs["experiment_config"] = experiment_config
 
+    LOGGER.info("2.i.8. Saving datasets - mini-batch")
+    _save_all_times_dataset(errors_sum_ds, experiment_data, "errors_sum")
+    _save_all_times_dataset(errors_count_ds, experiment_data, "errors_count")
     if save_all_times:
-        LOGGER.info("2.i.8. Saving datasets - mini-batch")
-        _save_all_times_dataset(errors_sum_ds, experiment_data, "errors_sum")
-        _save_all_times_dataset(errors_count_ds, experiment_data, "errors_count")
         _save_all_times_dataset(kinematics_ds, experiment_data, "kinematics", append=True)
 
     LOGGER.info("2.i.9. Summing along time - mini-batch")
