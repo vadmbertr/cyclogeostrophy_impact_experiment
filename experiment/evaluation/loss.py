@@ -63,15 +63,15 @@ def compute_loss_value_and_grad(
 
         loss_value_and_grad_vars[f"imbalance_u_{method}"] = (
             imbalance_u,
-            {"method": method, "what": "$J_u$", "units": "$(m/s)^2$"}
+            {"method": method, "what": "$\\sqrt{J_u}$", "units": "$m/s$"}
         )
         loss_value_and_grad_vars[f"imbalance_v_{method}"] = (
             imbalance_v,
-            {"method": method, "what": "$J_v$", "units": "$(m/s)^2$"}
+            {"method": method, "what": "$\\sqrt{J_v}$", "units": "$m/s$"}
         )
         loss_value_and_grad_vars[f"imbalance_uv_{method}"] = (
             (imbalance_u ** 2 + imbalance_v ** 2) ** (1 / 2),
-            {"method": method, "what": "$J$", "units": "$(m/s)^2$"}
+            {"method": method, "what": "$\\sqrt{J}$", "units": "$m/s$"}
         )
         loss_value_and_grad_vars[f"grad_J_u_{method}"] = (
             grad_J_u,

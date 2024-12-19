@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # This script runs the cyclogeostrophy impact experiment on DUACS data, in the Mediterranean Sea.
+# Saving all the daily snapshot datasets requires around 15GB of disk space.
 
 python main.py \
     ssh_data=copernicus \
