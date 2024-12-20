@@ -47,7 +47,6 @@ def estimate_and_evaluate(
     ssh_data: SSHData,
     cyclogeostrophy_fun: Callable,
     bin_size: int,
-    save_all_times: bool,
     memory_per_device: int
 ) -> Tuple[xr.Dataset, xr.Dataset]:
     ssh_ds = ssh_data.dataset
@@ -71,7 +70,6 @@ def estimate_and_evaluate(
                 cyclogeostrophy_fun,
                 lat_t, lon_t,
                 bin_size,
-                save_all_times,
                 experiment_data, experiment_config
             )
         )
@@ -113,13 +111,10 @@ def estimate_and_evaluate(
         kinematics_ds = kinematics_sum_ds / kinematics_count_ds
     del kinematics_sum_ds, kinematics_count_ds
 
-    LOGGER.info("2.N.2. Comparing methods")
+    LOGGER.info("2.N.2. Comparing geostrophy and cyclogeostrophy")
     errors_ds, kinematics_ds = compare_methods(errors_ds, kinematics_ds)
 
-    # LOGGER.info("2.N.3. Adding mean SSH")
-    # kinematics_ds = _add_ssh(kinematics_ds, ssh_ds)
-
-    LOGGER.info("2.N.4. Applying spatial mask")
+    LOGGER.info("2.N.3. Applying spatial mask and setting datasets attributes")
     kinematics_ds = kinematics_ds.where(~mask)
 
     errors_ds.attrs["experiment_config"] = experiment_config
@@ -221,7 +216,6 @@ def process_batch(
     lat_t: Float[Array, "lat lon"],
     lon_t: Float[Array, "lat lon"],
     bin_size: int,
-    save_all_times: bool,
     experiment_data: ExperimentData,
     experiment_config: str
 ) -> Tuple[xr.Dataset, xr.Dataset, xr.Dataset, xr.Dataset, np.ndarray]:
@@ -275,19 +269,15 @@ def process_batch(
     kinematics_ds = _kinematics_to_dataset(kinematics_vars, time, lat_t, lon_t)
     kinematics_ds = _loss_to_dataset(kinematics_ds, loss_vars)
     kinematics_ds = kinematics_ds.where(~mask)
-
-    # LOGGER.info("2.i.7. Comparing methods - mini-batch")
-    # _, kinematics_ds = compare_methods(None, kinematics_ds)
     
     kinematics_ds.attrs["experiment_config"] = experiment_config
 
-    LOGGER.info("2.i.8. Saving datasets - mini-batch")
+    LOGGER.info("2.i.7. Saving datasets - mini-batch")
     _save_all_times_dataset(errors_sum_ds, experiment_data, "errors_sum")
     _save_all_times_dataset(errors_count_ds, experiment_data, "errors_count")
-    if save_all_times:
-        _save_all_times_dataset(kinematics_ds, experiment_data, "kinematics", append=True)
+    _save_all_times_dataset(kinematics_ds, experiment_data, "kinematics", append=True)
 
-    LOGGER.info("2.i.9. Summing along time - mini-batch")
+    LOGGER.info("2.i.8. Summing along time - mini-batch")
     with xr.set_options(keep_attrs=True):
         kinematics_sum_ds = kinematics_ds.sum(dim="time", skipna=True, keep_attrs=True)
     kinematics_count_ds = xr.apply_ufunc(np.isfinite, kinematics_ds).sum(dim="time")

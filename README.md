@@ -62,12 +62,12 @@ cyclogeostrophy_fun (Callable, optional): Function for cyclogeostrophy computati
     Defaults to `cyclogeostrophy_conf`, which implies the use of the default `jaxparrow.cyclogeostrophy` parameters.
 bin_size (int, optional): Bin size in degrees (°) for error computations versus drifter data.
     Defaults to 1°.
-save_all_times (bool, optional): Whether to save variables at each time step.
+do_plot (bool, optional): Whether to automatically produce plots
     Defaults to True.
-plot_all_times (bool, optional): Whether to plot variables at each time step. Requires `save_all_times=True`.
-    Defaults to True.
+do_plot_all_times (bool, optional): Whether to produce plots for each time step. Requires `do_plot=True`.
+    Defaults to False.
 memory_per_device (int, optional): Available VRAM or RAM per device in gigabytes (GB).
-    Defaults to 35 GB.
+    Defaults to 30 GB.
 logger_level (int, optional): Logging output level (e.g., `logging.DEBUG`, `logging.INFO`, etc...).
     Defaults to `logging.DEBUG`.
 ```

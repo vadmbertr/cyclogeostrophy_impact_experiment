@@ -57,9 +57,9 @@ def assess_cyclogeostrophy_impact(
     temporal_extent: Tuple[str, str] | None = None,  # temporal domain window
     cyclogeostrophy_fun: Callable = cyclogeostrophy_conf,  # callable for the cyclogeostrophy, with parameters set
     bin_size: float = 1.,  # bins size for the errors computed vs. the drifters data (in °)
-    save_all_times: bool = True,  # whether to save variables at each time step
-    plot_all_times: bool = True,  # whether to plot variables at each time step
-    memory_per_device: int = 35,  # available VRAM or RAM (in Gb)
+    do_plot: bool = True,  # whether to automatically produce plots
+    do_plot_all_times: bool = False,  # whether to produce plots for each time step
+    memory_per_device: int = 30,  # available VRAM or RAM (in Gb)
     logger_level: int = logging.DEBUG  # logger outputs level
 ):
     """
@@ -99,12 +99,12 @@ def assess_cyclogeostrophy_impact(
             parameters.
         bin_size (int, optional): Bin size in degrees (°) for error computations versus drifter data.
             Defaults to 1°.
-        save_all_times (bool, optional): Whether to save variables at each time step.
+        do_plot (bool, optional): Whether to automatically produce plots
             Defaults to True.
-        plot_all_times (bool, optional): Whether to plot variables at each time step. Requires `save_all_times=True`.
-            Defaults to True.
+        do_plot_all_times (bool, optional): Whether to produce plots for each time step. Requires `do_plot=True`.
+            Defaults to False.
         memory_per_device (int, optional): Available VRAM or RAM per device in gigabytes (GB).
-            Defaults to 35 GB.
+            Defaults to 30 GB.
         logger_level (int, optional): Logging output level (e.g., `logging.DEBUG`, `logging.INFO`, etc...).
             Defaults to `logging.DEBUG`.
 
@@ -165,7 +165,6 @@ def assess_cyclogeostrophy_impact(
         drifter_data, ssh_data,
         cyclogeostrophy_fun,
         bin_size,
-        save_all_times,
         memory_per_device
     )
 
@@ -179,15 +178,17 @@ def assess_cyclogeostrophy_impact(
     )
     kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_ds_path))  # noqa
 
-    LOGGER.info("4. Producing plots")
-    plot_fields(errors_ds, kinematics_ds, experiment_data)
-    if save_all_times and plot_all_times:
-        LOGGER.info("4.1. Producing plots for all time steps. This may take a while...")
-        kinematics_ds_path = os.path.join(
-            experiment_data.experiment_path, experiment_data.results_dir, "all_times_kinematics.zarr"
-        )
-        kinematics_ds = xr.open_zarr(experiment_data.filesystem.get_path(kinematics_ds_path))
-        plot_fields(None, kinematics_ds, experiment_data, all_times=True)
+    if do_plot:
+        LOGGER.info("4. Producing plots")
+        LOGGER.info("4.1. Producing averaged time plots.")
+        plot_fields(errors_ds, kinematics_ds, experiment_data)
+        if do_plot_all_times:
+            LOGGER.info("4.2. Producing plots for all time steps. This may take a while...")
+            kinematics_ds_path = os.path.join(
+                experiment_data.experiment_path, experiment_data.results_dir, "all_times_kinematics.zarr"
+            )
+            kinematics_ds = xr.open_zarr(experiment_data.filesystem.get_path(kinematics_ds_path))
+            plot_fields(None, kinematics_ds, experiment_data, all_times=True)
 
 
 if __name__ == "__main__":
