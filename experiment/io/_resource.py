@@ -17,7 +17,11 @@ class Resource:
         if ".zarr" in self.path:
             ds = xr.open_zarr(self.path)
         elif "*.nc" in self.path:
-            ds = xr.open_mfdataset(self.path)
+            ds = xr.open_mfdataset(
+                self.path, 
+                concat_dim="time", combine="nested", compat="override", data_vars="minimal", coords="minimal",
+                parallel=True
+            )
         else:
             ds = xr.open_dataset(self.path)
 
