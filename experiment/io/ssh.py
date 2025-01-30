@@ -26,7 +26,7 @@ class SSHData:
         attrs = ds.longitude.attrs
         ds["longitude"] = (ds.longitude + 180) % 360 - 180
         ds.longitude.attrs = attrs
-        df = df.sortby(df.longitude)
+        ds = ds.sortby(ds.longitude)
 
         # transpose to impose dimensions order
         ds = ds.transpose("time", "latitude", "longitude")
