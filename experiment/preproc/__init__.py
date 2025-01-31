@@ -9,7 +9,7 @@ __all__ = [
     "drifter_preproc_store",
     "drifter_default_preproc_conf",
     "ssh_preproc_store",
-    "ssh_lon_to_180_180_preproc_conf"
+    "ssh_default_preproc_conf"
 ]
 
 
