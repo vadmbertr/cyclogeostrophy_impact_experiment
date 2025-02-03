@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
 import xarray as xr
 
@@ -9,7 +10,7 @@ def _differences(
     other: xr.DataArray | pd.Series
 ) -> Tuple[xr.DataArray | pd.Series, xr.DataArray | pd.Series]:
     abs_diff = other - ref
-    rel_diff = 100 * abs_diff / other  # .where(other > 1e-3, 0)
+    rel_diff = 100 * abs_diff / np.abs(other)  # .where(other > 1e-3, 0)
     return abs_diff, rel_diff
 
 
