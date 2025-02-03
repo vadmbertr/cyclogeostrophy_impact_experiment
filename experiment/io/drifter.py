@@ -2,7 +2,6 @@ from collections.abc import Callable
 from typing import Dict
 
 import clouddrift as cd
-import numpy as np
 
 from ._resource import Resource
 from .ssh import SSHData
