@@ -60,7 +60,7 @@ def estimate_and_evaluate(
     batch_indices = [0] + batch_indices + [n_time]
 
     # apply per batch
-    errors_df, kinematics_sum_ds, kinematics_count_ds, mask = None, None, None, None, None
+    errors_df, kinematics_sum_ds, kinematics_count_ds, mask = None, None, None, None
     for idx0, idx1 in zip(batch_indices[:-1], batch_indices[1:]):
         LOGGER.debug(f"2.i.0. mini-batch {[idx0, idx1]}")
         errors_df_batch, kinematics_sum_ds_batch, kinematics_count_ds_batch, mask_batch = (
