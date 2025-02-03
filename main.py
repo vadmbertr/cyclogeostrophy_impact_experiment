@@ -8,10 +8,8 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.conf import HydraConf, JobConf
 from hydra.experimental.callback import Callback
 from hydra_zen import store, zen, make_custom_builds_fn
-import xarray as xr
 
 from experiment.evaluation._process import estimate_and_evaluate
-from experiment.evaluation.visualization import plot_fields
 from experiment.io import drifter_store, experiment_store, ssh_store
 from experiment.io.drifter import DrifterData
 from experiment.io.experiment import ExperimentData
@@ -56,9 +54,6 @@ def assess_cyclogeostrophy_impact(
     spatial_extent: Tuple[float, float, float, float] | None = None,  # spatial domain bounding box ([lon0, lon1, lat0, lat1])
     temporal_extent: Tuple[str, str] | None = None,  # temporal domain window
     cyclogeostrophy_fun: Callable = cyclogeostrophy_conf,  # callable for the cyclogeostrophy, with parameters set
-    bin_size: float = 1.,  # bins size for the errors computed vs. the drifters data (in °)
-    do_plot: bool = True,  # whether to automatically produce plots
-    do_plot_all_times: bool = False,  # whether to produce plots for each time step
     memory_per_device: int = 30,  # available VRAM or RAM (in Gb)
     logger_level: int = logging.DEBUG  # logger outputs level
 ):
@@ -97,12 +92,6 @@ def assess_cyclogeostrophy_impact(
         cyclogeostrophy_fun (Callable, optional): Function for cyclogeostrophy computation with predefined parameters.
             Defaults to `cyclogeostrophy_conf`, which implies the use of the default `jaxparrow.cyclogeostrophy`
             parameters.
-        bin_size (int, optional): Bin size in degrees (°) for error computations versus drifter data.
-            Defaults to 1°.
-        do_plot (bool, optional): Whether to automatically produce plots
-            Defaults to True.
-        do_plot_all_times (bool, optional): Whether to produce plots for each time step. Requires `do_plot=True`.
-            Defaults to False.
         memory_per_device (int, optional): Available VRAM or RAM per device in gigabytes (GB).
             Defaults to 30 GB.
         logger_level (int, optional): Logging output level (e.g., `logging.DEBUG`, `logging.INFO`, etc...).
@@ -160,35 +149,22 @@ def assess_cyclogeostrophy_impact(
     )
 
     LOGGER.info("2. Estimating and evaluating SSC methods in mini-batch. This may take a while...")
-    errors_ds, kinematics_ds = estimate_and_evaluate(
+    errors_df, kinematics_ds = estimate_and_evaluate(
         experiment_data, experiment_config,
         drifter_data, ssh_data,
         cyclogeostrophy_fun,
-        bin_size,
         memory_per_device
     )
 
-    LOGGER.info("3. Saving time averaged datasets")
-    errors_ds_path = os.path.join(
-        experiment_data.experiment_path, experiment_data.results_dir, "time_averaged_errors.zarr"
+    LOGGER.info("3. Saving datasets")
+    errors_df_path = os.path.join(
+        experiment_data.experiment_path, experiment_data.results_dir, "errors_to_drifters.parquet"
     )
-    errors_ds.to_zarr(experiment_data.filesystem.get_path(errors_ds_path))  # noqa
+    errors_df.to_parquet(experiment_data.filesystem.get_path(errors_df_path))
     kinematics_ds_path = os.path.join(
         experiment_data.experiment_path, experiment_data.results_dir, "time_averaged_kinematics.zarr"
     )
-    kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_ds_path))  # noqa
-
-    if do_plot:
-        LOGGER.info("4. Producing plots")
-        LOGGER.info("4.1. Producing averaged time plots.")
-        plot_fields(errors_ds, kinematics_ds, experiment_data)
-        if do_plot_all_times:
-            LOGGER.info("4.2. Producing plots for all time steps. This may take a while...")
-            kinematics_ds_path = os.path.join(
-                experiment_data.experiment_path, experiment_data.results_dir, "all_times_kinematics.zarr"
-            )
-            kinematics_ds = xr.open_zarr(experiment_data.filesystem.get_path(kinematics_ds_path))
-            plot_fields(None, kinematics_ds, experiment_data, all_times=True)
+    kinematics_ds.to_zarr(experiment_data.filesystem.get_path(kinematics_ds_path))
 
 
 if __name__ == "__main__":

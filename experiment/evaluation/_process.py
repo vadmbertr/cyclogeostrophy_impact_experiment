@@ -8,6 +8,7 @@ import jax.numpy as jnp
 import numpy as np
 from jaxparrow.tools.geometry import compute_coriolis_factor, compute_spatial_step
 from jaxtyping import Array, Float
+import pandas as pd
 import xarray as xr
 
 from ..io.drifter import DrifterData
@@ -46,9 +47,8 @@ def estimate_and_evaluate(
     drifter_data: DrifterData,
     ssh_data: SSHData,
     cyclogeostrophy_fun: Callable,
-    bin_size: int,
     memory_per_device: int
-) -> Tuple[xr.Dataset, xr.Dataset]:
+) -> Tuple[pd.DataFrame, xr.Dataset]:
     ssh_ds = ssh_data.dataset
 
     # fix over batches
@@ -60,31 +60,24 @@ def estimate_and_evaluate(
     batch_indices = [0] + batch_indices + [n_time]
 
     # apply per batch
-    errors_sum_ds, errors_count_ds, kinematics_sum_ds, kinematics_count_ds, mask = None, None, None, None, None
+    errors_df, kinematics_sum_ds, kinematics_count_ds, mask = None, None, None, None, None
     for idx0, idx1 in zip(batch_indices[:-1], batch_indices[1:]):
         LOGGER.debug(f"2.i.0. mini-batch {[idx0, idx1]}")
-        errors_sum_ds_batch, errors_count_ds_batch, kinematics_sum_ds_batch, kinematics_count_ds_batch, mask_batch = (
+        errors_df_batch, kinematics_sum_ds_batch, kinematics_count_ds_batch, mask_batch = (
             process_batch(
                 idx0, idx1,
                 drifter_data.dataset, ssh_ds,
                 cyclogeostrophy_fun,
                 lat_t, lon_t,
-                bin_size,
                 experiment_data, experiment_config
             )
         )
 
-        if errors_sum_ds_batch is not None:
-            if errors_sum_ds is None:
-                errors_sum_ds = errors_sum_ds_batch
+        if errors_df_batch is not None:
+            if errors_df is None:
+                errors_df = errors_df_batch
             else:
-                errors_sum_ds += errors_sum_ds_batch
-
-        if errors_count_ds_batch is not None:
-            if errors_count_ds is None:
-                errors_count_ds = errors_count_ds_batch
-            else:
-                errors_count_ds += errors_count_ds_batch
+                errors_df = pd.concat([errors_df, errors_df_batch], ignore_index=True)
 
         if kinematics_sum_ds is None:
             kinematics_sum_ds = kinematics_sum_ds_batch
@@ -103,24 +96,19 @@ def estimate_and_evaluate(
 
     LOGGER.info("2.N.1. Normalizing batched datasets")
     with xr.set_options(keep_attrs=True):
-        errors_ds = errors_sum_ds / errors_count_ds
-    errors_ds["obs_density"] = errors_count_ds.to_array().mean(dim="variable")
-    errors_ds["obs_density"].attrs = {"what": "Drifter observations frequency"}
-    del errors_sum_ds, errors_count_ds
-    with xr.set_options(keep_attrs=True):
         kinematics_ds = kinematics_sum_ds / kinematics_count_ds
     del kinematics_sum_ds, kinematics_count_ds
 
     LOGGER.info("2.N.2. Comparing geostrophy and cyclogeostrophy")
-    errors_ds, kinematics_ds = compare_methods(errors_ds, kinematics_ds)
+    errors_df, kinematics_ds = compare_methods(errors_df, kinematics_ds)
 
     LOGGER.info("2.N.3. Applying spatial mask and setting datasets attributes")
     kinematics_ds = kinematics_ds.where(~mask)
 
-    errors_ds.attrs["experiment_config"] = experiment_config
+    errors_df.attrs["experiment_config"] = experiment_config
     kinematics_ds.attrs["experiment_config"] = experiment_config
 
-    return errors_ds, kinematics_ds
+    return errors_df, kinematics_ds
 
 
 def _estimate_ssc(
@@ -215,10 +203,9 @@ def process_batch(
     cyclogeostrophy_fun: Callable,
     lat_t: Float[Array, "lat lon"],
     lon_t: Float[Array, "lat lon"],
-    bin_size: int,
     experiment_data: ExperimentData,
     experiment_config: str
-) -> Tuple[xr.Dataset, xr.Dataset, xr.Dataset, xr.Dataset, np.ndarray]:
+) -> Tuple[pd.DataFrame, xr.Dataset, xr.Dataset, xr.Dataset, np.ndarray]:
     LOGGER.info("2.i.1. Estimating SSC - mini-batch")
     adt_t = ssh_ds.adt.isel(time=slice(idx0, idx1)).values
     uv_fields, lat_u, lon_u, lat_v, lon_v, mask = _estimate_ssc(cyclogeostrophy_fun, adt_t, lat_t, lon_t)
@@ -250,16 +237,10 @@ def process_batch(
         drifter_batch = interpolate_drifters_location(drifter_batch, time, lat_v, lon_u, uv_fields)
 
         LOGGER.info("2.i.4. Evaluating SSC against drifters velocities - mini-batch")
-        LOGGER.info("2.i.4.1. Computing along trajectories metrics - mini-batch")
-        traj_metrics = compute_along_traj_metrics(drifter_batch, uv_fields.keys())
+        errors_df = compute_along_traj_metrics(drifter_batch, uv_fields.keys())
         del drifter_batch
-        LOGGER.info("2.i.4.2. Computing binned metrics - mini-batch")
-        errors_sum_ds, errors_count_ds = compute_binned_metrics(ssh_ds, traj_metrics, uv_fields.keys(), bin_size)
-        errors_sum_ds.attrs["experiment_config"] = experiment_config
-        errors_count_ds.attrs["experiment_config"] = experiment_config
-        del traj_metrics
     else:
-        errors_sum_ds, errors_count_ds = None, None
+        errors_df = None
 
     LOGGER.info("2.i.5. Computing additional kinematics - mini-batch")
     kinematics_vars = compute_kinematics(uv_fields, uva_fields, lat_u, lon_u, lat_v, lon_v, mask)
@@ -270,11 +251,10 @@ def process_batch(
     kinematics_ds = _loss_to_dataset(kinematics_ds, loss_vars)
     kinematics_ds = kinematics_ds.where(~mask)
     
+    errors_df.attrs["experiment_config"] = experiment_config
     kinematics_ds.attrs["experiment_config"] = experiment_config
 
     LOGGER.info("2.i.7. Saving datasets - mini-batch")
-    _save_all_times_dataset(errors_sum_ds, experiment_data, "errors_sum")
-    _save_all_times_dataset(errors_count_ds, experiment_data, "errors_count")
     _save_all_times_dataset(kinematics_ds, experiment_data, "kinematics", append=True)
 
     LOGGER.info("2.i.8. Summing along time - mini-batch")
@@ -284,4 +264,4 @@ def process_batch(
     mask = np.any(mask, axis=0)
     del kinematics_ds
 
-    return errors_sum_ds, errors_count_ds, kinematics_sum_ds, kinematics_count_ds, mask
+    return errors_df, kinematics_sum_ds, kinematics_count_ds, mask

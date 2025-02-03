@@ -10,7 +10,7 @@ The impact is evaluated by computing geostrophic and cyclogeostrophic difference
 - cyclogeostrophic imbalance,
 - Euclidean distance between SSH derived SSC and drifters velocity.
 
-Those results are stored as datasets and some plots are produced automatically.
+Results are stored as datasets and dataframes.
 
 One objective of this repo was to make the choice of the SSC inversion parameters and the input datasets
 as flexible as possible, while keeping a clear track of the values used for each experiment.
@@ -60,12 +60,6 @@ temporal_extent (list[str, str], optional): Temporal domain window as a pair of 
     Defaults to None, which means no temporal restriction.
 cyclogeostrophy_fun (Callable, optional): Function for cyclogeostrophy computation with predefined parameters.
     Defaults to `cyclogeostrophy_conf`, which implies the use of the default `jaxparrow.cyclogeostrophy` parameters.
-bin_size (int, optional): Bin size in degrees (°) for error computations versus drifter data.
-    Defaults to 1°.
-do_plot (bool, optional): Whether to automatically produce plots
-    Defaults to True.
-do_plot_all_times (bool, optional): Whether to produce plots for each time step. Requires `do_plot=True`.
-    Defaults to False.
 memory_per_device (int, optional): Available VRAM or RAM per device in gigabytes (GB).
     Defaults to 30 GB.
 logger_level (int, optional): Logging output level (e.g., `logging.DEBUG`, `logging.INFO`, etc...).

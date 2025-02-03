@@ -11,6 +11,7 @@ jaxparrow
 jaxtyping
 matplotlib
 numpy
+pandas
 psutil
 # pyinterp
 pymbolic
