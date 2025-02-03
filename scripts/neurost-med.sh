@@ -9,5 +9,4 @@ python main.py \
     drifter_data=local \
     drifter_data.resource.path='https://minio.dive.edito.eu/oidc-bertrava/data/gdp6h.zarr' \
     temporal_extent='["2010", "2021"]' \
-    spatial_extent='[-6.0327, 36.2173, 30.2639, 45.7833]' \
-    bin_size=0.5
+    spatial_extent='[-6.0327, 36.2173, 30.2639, 45.7833]'
