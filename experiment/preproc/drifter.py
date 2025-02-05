@@ -10,7 +10,8 @@ DEFAULT_STEPS = (
     "drogued_only",
     "remove_low_latitudes",
     "finite_value_only",
-    "remove_outlier_values"
+    "remove_outlier_values",
+    "restrict_vars"
 )
 
 
@@ -63,20 +64,5 @@ def remove_outlier_values(ds: xr.Dataset, cutoff: float = 10) -> xr.Dataset:
     return ds
 
 
-def apply_low_pass_filter(ds: xr.Dataset, cutoff: float = 48*3600, order: int = 8) -> xr.Dataset:
-    def butterworth_low_pass(u: xr.DataArray, v: xr.DataArray) -> (np.ndarray, np.ndarray):
-        if len(u) <= 3 * (order + 1):
-            return u, v
-        normalized_cutoff = 2 * dt / cutoff
-        sos = signal.butter(order, normalized_cutoff, btype="low", analog=False, output="sos")
-        U = signal.sosfiltfilt(sos, u + 1j * v)
-        return U.real, U.imag
-    
-    dt = (ds.time[1] - ds.time[0]).astype(int) / 1e9  # seconds
-
-    ve, vn  = cd.ragged.apply_ragged(butterworth_low_pass, (ds.ve, ds.vn), ds.rowsize)
-
-    ds["ve"] = ds["ve"].copy(data=ve)
-    ds["vn"] = ds["vn"].copy(data=vn)
-
-    return ds
+def restrict_vars(ds: xr.Dataset) -> xr.Dataset:
+    return ds[["rowsize", "lon", "lat", "time", "ve", "vn"]]

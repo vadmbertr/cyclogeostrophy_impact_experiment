@@ -22,19 +22,10 @@ class SSHData:
     def apply_preproc(self, preproc_fn: Callable = None):
         ds = self.dataset
 
-        # enforce longitude from 0 to 360 to -180 to 180
-        attrs = ds.longitude.attrs
-        ds["longitude"] = (ds.longitude + 180) % 360 - 180
-        ds.longitude.attrs = attrs
-        ds = ds.sortby(ds.longitude)
-
-        # transpose to impose dimensions order
-        ds = ds.transpose("time", "latitude", "longitude")
-
         if preproc_fn is not None:
             ds = preproc_fn(ds)
 
-        self.dataset = ds[["adt", "sla"]]
+        self.dataset = ds
 
     def apply_extent(
         self, 

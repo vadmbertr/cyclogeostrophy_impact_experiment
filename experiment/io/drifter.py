@@ -48,4 +48,4 @@ class DrifterData:
         if preproc_fn is not None:
             ds = preproc_fn(ds)
 
-        self.dataset = ds[["rowsize", "lon", "lat", "time", "ve", "vn"]]
+        self.dataset = ds
