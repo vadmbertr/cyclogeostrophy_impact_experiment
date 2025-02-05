@@ -10,8 +10,7 @@ DEFAULT_STEPS = (
     "drogued_only",
     "remove_low_latitudes",
     "finite_value_only",
-    "remove_outlier_values",
-    "apply_low_pass_filter"
+    "remove_outlier_values"
 )
 
 
