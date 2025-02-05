@@ -54,7 +54,7 @@ class CopernicusResource:
         if disable_caching:
             cachier.disable_caching()
 
-        cm.login(os.environ[cms_username_env_var], os.environ[cms_password_env_var], overwrite_configuration_file=True)
+        cm.login(os.environ[cms_username_env_var], os.environ[cms_password_env_var])
         self.dataset_id = cms_dataset_id
 
     def open(self) -> xr.Dataset:
