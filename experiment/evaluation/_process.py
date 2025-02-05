@@ -19,7 +19,7 @@ from .comparison import compare_methods
 from .interpolation import interpolate_drifters_location
 from .kinematics import compute_kinematics
 from .loss import compute_loss_value_and_grad
-from .metrics import compute_along_traj_metrics, compute_binned_metrics
+from .metrics import compute_along_traj_metrics
 
 
 def _estimate_batch_indices(n_time: int, n_lat: int, n_lon: int, memory_per_device: float) -> List[int]:

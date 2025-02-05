@@ -27,9 +27,8 @@ def apply_ssh_preproc(ssh_ds: xr.Dataset, preproc_steps: tuple) -> xr.Dataset:
 
 pbuilds = make_custom_builds_fn(zen_partial=True, populate_full_signature=True)
 
-no_preproc_conf = pbuilds(no_preproc)
-
 drifter_default_preproc_conf = pbuilds(apply_drifter_preproc, preproc_steps=drifter.DEFAULT_STEPS)
+no_preproc_conf = pbuilds(no_preproc)
 drifter_preproc_store = store(group="drifter_preproc")
 drifter_preproc_store(drifter_default_preproc_conf, name="default")
 drifter_preproc_store(no_preproc_conf, name="none")

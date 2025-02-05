@@ -49,7 +49,7 @@ def assess_cyclogeostrophy_impact(
     drifter_data: DrifterData,  # input drifter data
     ssh_rename: Dict[str, str] | None = None,  # dictionary mapping SSH dataset original to new variables names
     drifter_rename: Dict[str, str] | None = None,  # dictionary mapping drifter dataset original to new variables names
-    ssh_preproc: Callable = ssh_default_preproc_conf,  # preprocessing applied to the drifters
+    ssh_preproc: Callable = ssh_default_preproc_conf,  # preprocessing applied to the SSH
     drifter_preproc: Callable = drifter_default_preproc_conf,  # preprocessing applied to the drifters
     spatial_extent: Tuple[float, float, float, float] | None = None,  # spatial domain bounding box ([lon0, lon1, lat0, lat1])
     temporal_extent: Tuple[str, str] | None = None,  # temporal domain window

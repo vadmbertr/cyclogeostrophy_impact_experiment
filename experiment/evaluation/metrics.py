@@ -1,8 +1,6 @@
 from typing import List, Tuple
 
-import numpy as np
 import pandas as pd
-import pyinterp
 import xarray as xr
 
 
@@ -32,44 +30,4 @@ def compute_along_traj_metrics(drifter_ds: xr.Dataset, methods: List[str]) -> pd
         traj_metrics_df[var].attrs = traj_metrics_ds[var].attrs.copy()
 
     return traj_metrics_df
-
-
-def compute_binned_metrics(
-    field_ds: xr.Dataset,
-    traj_metrics: xr.Dataset,
-    methods: List[str],
-    bin_size: int
-) -> Tuple[xr.Dataset, xr.Dataset]:
-    latitude = np.arange(field_ds.latitude.min(), field_ds.latitude.max(), bin_size) + bin_size / 2
-    longitude = np.arange(field_ds.longitude.min(), field_ds.longitude.max(), bin_size) + bin_size / 2
-
-    binning = pyinterp.Binning2D(pyinterp.Axis(longitude + 180, is_circle=True), pyinterp.Axis(latitude))
-
-    what_attrs = {
-        "err_u": "$\\langle \\epsilon_{u} \\rangle$",
-        "err_v": "$\\langle \\epsilon_{v} \\rangle$",
-        "err": "$\\langle \\epsilon \\rangle$",
-    }
-
-    data_vars_sum = {}
-    data_vars_count = {}
-    for method in methods:
-        for expr_prefix in ["err_u", "err_v", "err"]:
-            expr = f"{expr_prefix}_{method}"
-            binning.clear()
-            binning.push(traj_metrics.lon + 180, traj_metrics.lat, traj_metrics[expr], False)  # noqa
-            data_vars_sum[f"{expr}"] = (
-                ["latitude", "longitude"],
-                binning.variable("sum").T,
-                {"method": method, "what": what_attrs[expr_prefix], "units": "$m/s$"}
-            )
-            data_vars_count[f"{expr}"] = (["latitude", "longitude"], binning.variable("sum_of_weights").T)
-
-    uv_coords = {
-        "latitude": (["latitude"], latitude.astype(np.float32)),
-        "longitude": (["longitude"], longitude.astype(np.float32))
-    }
-    errors_sum_ds = xr.Dataset(data_vars=data_vars_sum, coords=uv_coords)
-    errors_count_ds = xr.Dataset(data_vars=data_vars_count, coords=uv_coords)
-
-    return errors_sum_ds, errors_count_ds
+ 
