@@ -3,7 +3,7 @@ import xarray as xr
 
 DEFAULT_STEPS = (
     "lon_to_180_180",
-    "restrict_vars"
+    "restrict_vars",
     "time_lat_lon"
 )
 
