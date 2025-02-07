@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Dict, Literal, Tuple
 
 from jax import vmap
 from jaxparrow.tools import operators as jpw_operators
@@ -26,8 +26,12 @@ def interpolate_drifters_location(
     longitude_u: Float[Array, "lat lon"],
     latitude_v: Float[Array, "lat lon"],
     longitude_v: Float[Array, "lat lon"],
-    uv_fields_hat: dict
+    uv_fields_hat: Dict[str, Tuple[np.ndarray, np.ndarray]],
+    previous_uv_fields: Dict[str, Tuple[np.ndarray, np.ndarray]]
 ) -> xr.Dataset:
+    if previous_uv_fields is not None:
+        time = np.concat([time[0:1] - (time[1] - time[0]), time])
+        
     u_y_axis = pyinterp.Axis(latitude_u[:, 0])
     u_x_axis = pyinterp.Axis(longitude_u[0, :] + 180, is_circle=True)
     v_y_axis = pyinterp.Axis(latitude_v[:, 0])
@@ -35,6 +39,11 @@ def interpolate_drifters_location(
     t_axis = pyinterp.TemporalAxis(time)
 
     for method, (u_field, v_field) in uv_fields_hat.items():
+        if previous_uv_fields is not None:
+            previous_u_field, previous_v_field = previous_uv_fields[method]
+            u_field = np.concat([previous_u_field, u_field])
+            v_field = np.concat([previous_v_field, v_field])
+        
         u_grid = pyinterp.Grid3D(u_x_axis, u_y_axis, t_axis, u_field.T)
         v_grid = pyinterp.Grid3D(v_x_axis, v_y_axis, t_axis, v_field.T)
 

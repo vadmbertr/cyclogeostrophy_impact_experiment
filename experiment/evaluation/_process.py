@@ -32,15 +32,6 @@ def _estimate_batch_indices(n_time: int, n_lat: int, n_lon: int, memory_per_devi
     return indices.tolist() + [n_time]
 
 
-def _add_ssh(kinematics_ds: xr.Dataset, ssh_ds: xr.Dataset) -> xr.Dataset:
-    kinematics_ds["adt"] = (
-        ["latitude", "longitude"],
-        ssh_ds.adt.mean(dim="time").values,
-        {"what": ssh_ds.adt.attrs["long_name"], "units": "$m$"}
-    )
-    return kinematics_ds
-
-
 def estimate_and_evaluate(
     experiment_data: ExperimentData,
     experiment_config: str,
@@ -59,16 +50,17 @@ def estimate_and_evaluate(
     batch_indices = _estimate_batch_indices(n_time, n_lat, n_lon, memory_per_device)
 
     # apply per batch
-    errors_df, kinematics_sum_ds, kinematics_count_ds, mask = None, None, None, None
+    errors_df, kinematics_sum_ds, kinematics_count_ds, mask, previous_uv_fields = None, None, None, None, None
     for idx0, idx1 in zip(batch_indices[:-1], batch_indices[1:]):
         LOGGER.debug(f"2.i.0. mini-batch {[idx0, idx1]}")
-        errors_df_batch, kinematics_sum_ds_batch, kinematics_count_ds_batch, mask_batch = (
+        errors_df_batch, kinematics_sum_ds_batch, kinematics_count_ds_batch, mask_batch, previous_uv_fields = (
             process_batch(
                 idx0, idx1,
                 drifter_data.dataset, ssh_ds,
                 cyclogeostrophy_fun,
                 lat_t, lon_t,
-                experiment_data, experiment_config
+                experiment_data, experiment_config,
+                previous_uv_fields
             )
         )
 
@@ -203,8 +195,9 @@ def process_batch(
     lat_t: Float[Array, "lat lon"],
     lon_t: Float[Array, "lat lon"],
     experiment_data: ExperimentData,
-    experiment_config: str
-) -> Tuple[pd.DataFrame, xr.Dataset, xr.Dataset, xr.Dataset, np.ndarray]:
+    experiment_config: str,
+    previous_uv_fields: Dict[str, Tuple[np.ndarray, np.ndarray]]
+) -> Tuple[pd.DataFrame, xr.Dataset, xr.Dataset, xr.Dataset, np.ndarray, Dict[str, Tuple[np.ndarray, np.ndarray]]]:
     LOGGER.info("2.i.1. Estimating SSC - mini-batch")
     adt_t = ssh_ds.adt.isel(time=slice(idx0, idx1)).values
     uv_fields, lat_u, lon_u, lat_v, lon_v, mask = _estimate_ssc(cyclogeostrophy_fun, adt_t, lat_t, lon_t)
@@ -224,22 +217,30 @@ def process_batch(
 
     LOGGER.info("2.i.3. Interpolating SSC velocities to drifters positions - mini-batch")
     time = ssh_ds.time[idx0:idx1].values
+    t0 = time[0]
+    if previous_uv_fields is not None:
+        dt = time[1] - time[0]
+        t0 -= (dt + np.timedelta64(1, "s"))
     drifter_ds.time.load()
     drifter_batch = cd.ragged.subset(
         drifter_ds,
-        {"time": (time[0], time[-1])},
+        {"time": (t0, time[-1])},
         row_dim_name="traj"
     )
 
     if drifter_batch:
         drifter_batch = drifter_batch.drop_vars(["rowsize", "id"])
-        drifter_batch = interpolate_drifters_location(drifter_batch, time, lat_u, lon_u, lat_v, lon_v, uv_fields)
+        drifter_batch = interpolate_drifters_location(
+            drifter_batch, time, lat_u, lon_u, lat_v, lon_v, uv_fields, previous_uv_fields
+        )
 
         LOGGER.info("2.i.4. Evaluating SSC against drifters velocities - mini-batch")
         errors_df = compute_along_traj_metrics(drifter_batch, uv_fields.keys())
         del drifter_batch
     else:
         errors_df = None
+
+    next_uv_fields = dict((method, (u_field[-1:], v_field[-1:])) for method, (u_field, v_field) in uv_fields.items())
 
     LOGGER.info("2.i.5. Computing additional kinematics - mini-batch")
     kinematics_vars = compute_kinematics(uv_fields, uva_fields, lat_u, lon_u, lat_v, lon_v, mask)
@@ -263,4 +264,4 @@ def process_batch(
     mask = np.any(mask, axis=0)
     del kinematics_ds
 
-    return errors_df, kinematics_sum_ds, kinematics_count_ds, mask
+    return errors_df, kinematics_sum_ds, kinematics_count_ds, mask, next_uv_fields
