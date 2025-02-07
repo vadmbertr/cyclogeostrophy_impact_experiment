@@ -41,4 +41,4 @@ def interpolate_drifters_location(
             "obs", pyinterp.trivariate(v_grid, drifter_ds.lon + 180, drifter_ds.lat, drifter_ds.time)
         )
 
-    return drifter_ds.drop_vars(["time"])
+    return drifter_ds
