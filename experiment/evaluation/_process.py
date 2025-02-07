@@ -28,8 +28,8 @@ def _estimate_batch_indices(n_time: int, n_lat: int, n_lon: int, memory_per_devi
     comp_mem_per_time *= 40  # empirical factor preventing OOM errors
     batch_size = int(memory_per_device // comp_mem_per_time)  # conservative batch size
     n_batches = math.ceil(n_time / batch_size)  # conservative number of batches
-    indices = jnp.arange(1, n_batches) * batch_size
-    return indices.tolist()
+    indices = np.arange(0, n_batches) * batch_size
+    return indices.tolist() + [n_time]
 
 
 def _add_ssh(kinematics_ds: xr.Dataset, ssh_ds: xr.Dataset) -> xr.Dataset:
@@ -57,7 +57,6 @@ def estimate_and_evaluate(
     # estimate batch indices based on domain dimensions
     n_time, n_lat, n_lon = tuple(ssh_ds.sizes.values())
     batch_indices = _estimate_batch_indices(n_time, n_lat, n_lon, memory_per_device)
-    batch_indices = [0] + batch_indices + [n_time]
 
     # apply per batch
     errors_df, kinematics_sum_ds, kinematics_count_ds, mask = None, None, None, None
@@ -234,7 +233,7 @@ def process_batch(
 
     if drifter_batch:
         drifter_batch = drifter_batch.drop_vars(["rowsize", "id"])
-        drifter_batch = interpolate_drifters_location(drifter_batch, time, lat_v, lon_u, uv_fields)
+        drifter_batch = interpolate_drifters_location(drifter_batch, time, lat_u, lon_u, lat_v, lon_v, uv_fields)
 
         LOGGER.info("2.i.4. Evaluating SSC against drifters velocities - mini-batch")
         errors_df = compute_along_traj_metrics(drifter_batch, uv_fields.keys())

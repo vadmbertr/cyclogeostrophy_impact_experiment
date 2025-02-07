@@ -1,6 +1,5 @@
 import clouddrift as cd
 import numpy as np
-from scipy import signal
 import xarray as xr
 
 

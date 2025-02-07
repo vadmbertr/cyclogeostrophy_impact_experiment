@@ -22,17 +22,21 @@ def interpolate_grid(
 def interpolate_drifters_location(
     drifter_ds: xr.Dataset,
     time: Float[Array, "time"],
-    latitude_v: Float[Array, "lat lon"],
+    latitude_u: Float[Array, "lat lon"],
     longitude_u: Float[Array, "lat lon"],
+    latitude_v: Float[Array, "lat lon"],
+    longitude_v: Float[Array, "lat lon"],
     uv_fields_hat: dict
 ) -> xr.Dataset:
-    y_axis = pyinterp.Axis(latitude_v[:, 0])
-    x_axis = pyinterp.Axis(longitude_u[0, :] + 180, is_circle=True)
+    u_y_axis = pyinterp.Axis(latitude_u[:, 0])
+    u_x_axis = pyinterp.Axis(longitude_u[0, :] + 180, is_circle=True)
+    v_y_axis = pyinterp.Axis(latitude_v[:, 0])
+    v_x_axis = pyinterp.Axis(longitude_v[0, :] + 180, is_circle=True)
     t_axis = pyinterp.TemporalAxis(time)
 
     for method, (u_field, v_field) in uv_fields_hat.items():
-        u_grid = pyinterp.Grid3D(x_axis, y_axis, t_axis, u_field.T)
-        v_grid = pyinterp.Grid3D(x_axis, y_axis, t_axis, v_field.T)
+        u_grid = pyinterp.Grid3D(u_x_axis, u_y_axis, t_axis, u_field.T)
+        v_grid = pyinterp.Grid3D(v_x_axis, v_y_axis, t_axis, v_field.T)
 
         drifter_ds[f"u_hat_{method}"] = (
             "obs", pyinterp.trivariate(u_grid, drifter_ds.lon + 180, drifter_ds.lat, drifter_ds.time)
