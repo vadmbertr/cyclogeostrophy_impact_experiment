@@ -8,7 +8,7 @@ def remove_equatorial_band(ds: xr.Dataset) -> xr.Dataset:
 
 
 def restrict_to_gulfstream(ds: xr.Dataset) -> xr.Dataset:
-    return ds.sel(latitude=slice(25, 50), longitude=slice(-80, -10))
+    return ds.sel(latitude=slice(33.5, 42.5), longitude=slice(-73.5, -52.5))
 
 
 def restrict_to_mediterranean_sea(ds: xr.Dataset) -> xr.Dataset:
