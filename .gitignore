@@ -5,12 +5,8 @@
 .env
 
 # data
-**/data/*
-**/run/*
-**/viz/*
-**/plot/*
-**/experiments/*
-**/outputs/*
+paper-results-reproduction/data-files/*.nc
+paper-results-reproduction/figures/*.png
 
 # IDE related
 .idea

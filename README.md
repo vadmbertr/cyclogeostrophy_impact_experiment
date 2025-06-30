@@ -16,6 +16,8 @@ One objective of this repo was to make the choice of the SSC inversion parameter
 as flexible as possible, while keeping a clear track of the values used for each experiment.
 For this it uses the `hydra` and `hydra-zen` libraries ([docs](https://mit-ll-responsible-ai.github.io/hydra-zen/)).
 
+It can also be used to reproduce the results presented in our paper, see [paper-results-reproduction/README.md](paper-results-reproduction/README.md).
+
 ## Installation
 
 Assuming `conda` is installed, running:
