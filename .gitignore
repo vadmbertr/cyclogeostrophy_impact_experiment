@@ -6,6 +6,7 @@
 
 # data
 paper-results-reproduction/data-files/*.nc
+paper-results-reproduction/data-files/*.parquet
 paper-results-reproduction/figures/*.png
 
 # IDE related
