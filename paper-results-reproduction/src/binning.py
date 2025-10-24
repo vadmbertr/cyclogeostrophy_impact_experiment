@@ -27,6 +27,11 @@ def compute_spatial_binned_errors(df: pd.DataFrame, latitude: np.ndarray, longit
             np.sqrt(binning.variable("variance").T),
             {"units": "$m/s$"}
         )
+        data_vars[f"{var}_rms"] = (
+            ["latitude", "longitude"],
+            np.sqrt(data_vars[f"{var}_mean"] ** 2 + data_vars[f"{var}_sd"] ** 2),
+            {"units": "$m/s$"}
+        )
 
     data_vars["count"] = (
         ["latitude", "longitude"],
