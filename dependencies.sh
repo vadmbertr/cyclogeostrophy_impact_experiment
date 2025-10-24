@@ -9,4 +9,5 @@ conda install pyinterp -c conda-forge
 pip install --upgrade pip
 pip install -r requirements.txt --upgrade
 pip install -U numpy  # needed to overwrite copernicusmarine version
+pip install -U zarr  # needed to overwrite clouddrift version
 # pip install -U "jax[cuda12]"  # uncomment this to install a cuda version of JAX
