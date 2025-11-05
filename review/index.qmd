@@ -1,0 +1,19 @@
+---
+title: "Respond to all referee comments"
+authors:
+  - name: Vadim Bertrand
+    email: vadim.bertrand@univ-grenoble-alpes.fr
+    affiliations: 
+      - name: IGE, Université Grenoble Alpes
+    roles: writing
+    corresponding: true
+bibliography: references.bib
+---
+
+{{< include rev1.qmd >}}
+{{< include rev2.qmd >}}
+
+## References {.unnumbered}
+
+::: {#refs}
+:::

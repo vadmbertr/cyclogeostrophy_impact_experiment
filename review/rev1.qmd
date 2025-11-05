@@ -1,0 +1,163 @@
+# Respond to anonymous referee 1
+
+We are grateful to the referee for its detailled comments that helped us improved our manuscript, in particular regarding the choice of the metrics used to assess inversion methods' performances.
+The manuscript has been revised to take the referee comments into consideration.
+
+## 1., 2., 3., and 4.
+
+We have decided to address these comments together, as they all concern the statistical metrics used in the manuscript.
+We thank the referee for highlighting the difficulties in interpreting and handling the metrics as originally defined.
+
+It is indeed true that the misfit $\varepsilon$ defined in equation (8) may follow a Rayleigh distribution, $Z=\sqrt{X^2 + Y^2}$, although $X$ and $Y$ may not be formally independant and identically distributed.
+However, the subsequent statistics are empirical quantities derived from a sample population, without any Gaussian assumption on $\varepsilon$.
+We believe that the confusion may stem from the incorrect use of the term “standard error“ when introducing equation (10), as pointed out by referee 2.
+The appropriate term should have been “(population) standard deviation of the error“.
+
+We acknowledge that using separately the population mean and standard deviation of the misfit can be unclear and may obscure the demonstration that the variational method is effective.
+To clarify the analysis, we now square the misfit in equation (8) and rely solely on the RMSE to assess the performance of the inversion methods, as also suggested by referee 2.
+This approach simultaneously accounts for both the accuracy and the precision of the reconstruction.
+As a result, Figure 4 has been updated (along with the corresponding text), and Figure C2 has been removed.
+
+## 5. 
+
+We thank the referee for this insightful comment and for pointing out the relevance of the analytical gradient wind solution discussed by @penvenCyclogeostrophicBalanceMozambique2014 and @knoxIterativeSolutionsGradient2006.
+We agree that the gradient wind formulation provides an elegant analytical framework that can, in some cases, serve as a useful reference or initial approximation.
+
+However, the gradient wind equation presents two main limitations that motivated our choice not to rely on it in the present study. 
+First, it may have no real solution under certain dynamical conditions, particularly when the curvature or pressure gradient terms lead to non-physical results. 
+Second, its formulation depends on the radius of deformation, which is not known a priori and can vary significantly in space and time. 
+These aspects make the method difficult to apply in a global and automated context, which is why we chose to focus instead on the iterative approach, as in @caoGlobalSeaSurface2023 and @ioannouCyclostrophicCorrectionsAVISO2019.
+
+Nonetheless, we acknowledge that the gradient wind solution could serve as a valuable first guess for iterative or variational inversion methods. We have therefore added a note in the discussion section to highlight this potential use and to suggest it as an avenue for future work.
+
+## 6. and 7.
+
+We thank the referee for this helpful clarification regarding terminology. 
+We agree that the term “convective force” is not appropriate in an oceanographic context, where horizontal motions are typically referred to as advective terms rather than as a force. 
+We have therefore replaced “convective force” with “advective terms” throughout the manuscript to ensure consistency with standard oceanographic usage.
+
+Similarly, we acknowledge that the Coriolis acceleration is more accurately described as a pseudo force and should be referred to as a “Coriolis term.”
+The manuscript has been revised accordingly.
+
+## 8.
+
+We thank the referee for this valuable suggestion. 
+We agree that this statement required further clarification.
+The cyclogeostrophic equation may have no real solution when the curvature and pressure gradient terms lead to an imbalance such that the discriminant of the quadratic form becomes negative. 
+This typically occurs in regions where the centrifugal acceleration exceeds the pressure gradient force, preventing the existence of a dynamically consistent steady-state velocity.
+
+We have expanded the corresponding paragraph to clarify this point. 
+In addition, this revision provided an opportunity to mention the analytical gradient wind solution, which faces similar limitations regarding the existence of real solutions. 
+This connection has now been explicitly discussed in the revised text.
+
+## 9.
+
+We thank the referee for this useful comment. 
+In the Global Drifter Program (GDP) database, an additional flag is provided to indicate the presence of the drogue. 
+This flag is determined following the procedure described by @lumpkinRemovingSpuriousLowFrequency2013, in which the data are automatically reanalyzed to detect drogue loss based on anomalous downwind ageostrophic motion. 
+In our analysis, we retain only the observations identified as drogued according to this procedure. 
+We have clarified this point in the revised manuscript.
+
+## 10.
+
+We thank the referee for this useful comment. 
+As explained in Section 2.3 of the manuscript, partial derivatives are computed using finite differences on an Arakawa C-grid. 
+In this configuration, the sea surface height (SSH) is defined at the scalar (T) points of the grid, while the zonal and meridional velocity components ($u$ and $v$) are defined at the staggered C-grid points. 
+Consequently, when computing derived quantities such as velocity magnitude or vorticity, an interpolation step is required to ensure that all variables are collocated on the same grid points. 
+Specifically, for the velocity magnitude, $u$ and $v$ are first interpolated to the T points prior to computation, whereas for vorticity, the calculation is performed on the C-grid and the resulting field is then interpolated back to the T points.
+We have clarified this explanation in the revised manuscript to make the use of the C-grid more explicit.
+
+## 11.
+
+We thank the referee for this pertinent question. 
+In our analysis, we do not apply any constraint on the temporal or spatial separation between drifter observations and satellite overpasses, since our objective is to compare the inversion methods using Level-4 (L4) gridded products rather than along-track data. 
+Consequently, the interpolation of the model velocity field $\mathbf{u}_M$ at the drifter position $\mathbf{X}_i$ is performed directly on the regular L4 grid, and the effective spatial separation is therefore bounded by $\frac{\sqrt{dx^2 + dy^2}}{2}$, with $dx$ and $dy$ denoting the grid spacings in the zonal and meridional directions.
+
+## 12.
+
+We thank the referee for this helpful observation. 
+Within each spatial–temporal bin, the binning domain and the set of drifter observations are identical for all methods and products, even though the gridded datasets may have different spatial resolutions. In other words, all comparisons are performed within the same geographical and temporal bins, ensuring that $N$ is identical for $M_1$ and $M_2$. 
+Consequently, the normalized difference in equation (10) does not depend on the number of samples; it reflects only differences in the dispersion of the misfit between methods.
+
+In line with the referee’s suggestion, we have also revised the analysis to work with the squared misfit and to report RMSE (and, equivalently, percent reduction in MSE) as our primary metric.
+
+## 13.
+
+We thank the referee for this observation. 
+We agree that the use of “anticyclonic (cyclonic)” could appear redundant given the description of the Gulf Stream context. 
+However, our intent was to distinguish between meanders of the Gulf Stream jet and detached eddies, which are distinct features. 
+To avoid confusion, we have clarified the text to refer to the northern (southern) meanders of the Gulf Stream rather than branches, and we now explicitly state that similar differences are observed for anticyclonic (cyclonic) eddies. 
+This distinction makes it clear that the statement refers to both the jet meanders and the surrounding eddy field.
+
+## 14.
+
+We thank the referee for this constructive comment. 
+The artifacts observed in the most dynamic regions of the jet and eddies arise primarily from the local convergence behavior of the fixed-point iterative scheme, see also referee 2 comment (2).
+In these regions, strong curvature and nonlinearity can cause the algorithm to converge toward local, non-physical solutions or to fail to converge entirely if the initial guess does not lie within the basin of attraction of a stable solution. 
+This results in locally inconsistent velocity estimates that appear as small-scale artifacts.
+
+Regarding the second point, the variational formulation does implicitly impose a degree of spatial smoothness, since it minimizes a global misfit functional that integrates over the entire domain. 
+While no explicit regularization term is introduced, the minimization process itself tends to favor spatially coherent solutions. 
+We have expanded the discussion in the revised manuscript to clarify these two aspects.
+
+## 15., 16., and 17.
+
+We thank the referee for these valuable comments, which all relate to Figure 5 and the interpretation of statistical significance. 
+We agree that the original figure was difficult to interpret and that the reduction in standard error, as previously presented, did not clearly demonstrate a statistically significant improvement of the cyclogeostrophic reconstruction compared to the geostrophic one.
+
+To address this, we have revised the analysis by applying a logistic regression model that estimates the conditional probability $P(\varepsilon_{cg} < \varepsilon_{g} ∣ \|u_c\|), representing the likelihood that the cyclogeostrophic reconstruction outperforms the geostrophic one as a function of the cyclostrophic correction magnitude. 
+This approach allows us to estimate confidence intervals and to better assess where and to what extent the cyclogeostrophic correction statistically improves the reconstruction.
+
+Figure 5 has been updated accordingly and now displays this probability together with its confidence bands. 
+We believe this revised formulation provides a clearer and statistically more robust way to evaluate the relative benefit of the cyclogeostrophic correction.
+
+## 18.
+
+We thank the referee for this insightful comment. 
+We agree that, in a classical adjoint-based data assimilation (DA) framework, the distinction between geostrophic and total velocity components is already embedded within the model’s dynamical core and its adjoint, so a separate cyclogeostrophic module would not be strictly necessary.
+
+Our intent was rather to emphasize that the proposed formulation, being fully differentiable and implemented in JAX, can be flexibly integrated as an additional or alternative constraint within variational or machine-learning–based DA systems. 
+In particular, its modular structure allows the introduction of custom penalization terms, for example to impose dynamically consistent flow curvature constraints or to jointly filter noisy SSH observations (such as those from SWOT, see @tranchantSWOTRevealsFineScale2025 for example).
+
+We have clarified this point in the revised text to make it clear that our approach is not meant to replace the dynamics already captured by adjoint-based systems, but rather to offer a lightweight, differentiable component that can be incorporated into emerging DA or learning frameworks to improve the handling of nonlinear balance relations and observation noise.
+
+## 19.
+
+We thank the referee for this pertinent comment. 
+Following the suggestions of referee 2, we have extended the evaluation by including in the main text a quantitative skill assessment using the high-resolution eNATL60 simulation as a reference, following the same methodology as the drifter-based comparison.
+
+Furthermore, we have expanded the discussion to better explain the origins of these distinctions. 
+As clarified in response to comment 14 and to referee 2’s comments 2, 3, and minor comment 5, the main differences arise from the convergence behavior of the iterative fixed-point solver and the global nature of the variational minimization, which implicitly imposes smoother and dynamically more coherent corrections. 
+These points are now explicitly discussed in the revised manuscript and illustrated in the updated figures.
+
+## 20.
+
+We thank the referee for this thoughtful comment. 
+We acknowledge that, in the current version, the SWOT demonstration does not include a direct validation against in situ measurements and therefore provides limited quantitative assessment of skill. 
+Our intent was primarily to illustrate the applicability of the proposed inversion framework to SWOT-like swath SSH data (L3 products), where the departure from geostrophy is expected to be significant.
+
+As also noted by referee 2, there is a growing interest within the SWOT community in moving beyond the geostrophic approximation by directly exploiting the high-resolution SSH fields from the swath [@archerWideswathSatelliteAltimetry2025; @tranchantSWOTRevealsFineScale2025; @wangSWOTMissionValidation2025; @zhangAssessingSubmesoscaleSea2025]. 
+In this context, we believe that showing the feasibility of the cyclogeostrophic inversion on SWOT data as an appendix remains relevant, even if it is presented as a proof of concept rather than a full validation exercise.
+
+We have clarified this objective in the revised manuscript and emphasized that the SWOT example is meant to illustrate the method’s potential for future applications rather than to provide a detailed performance assessment.
+
+## 21.
+
+We thank the referee for this detailed comment. 
+As suggested, we have removed Appendix C in the revised version of the manuscript, since we now rely exclusively on the RMSE as the performance metric. 
+This modification addresses the interpretational issues associated with the mean misfit and simplifies the presentation of the results, making the assessment more consistent and statistically robust.
+
+## 22.
+
+We thank the referee for sharing this perspective. 
+We acknowledge that the package name jaxparrow may inadvertently distract some readers or evoke unintended associations. 
+The name was chosen simply as a contraction of JAX—the differentiable programming framework used for implementation—and arrow, referring to the velocity vector central to the method. 
+No reference to any cultural or historical figure was intended.
+We appreciate the referee’s comment and note that the name is used purely for identification of the software package, without any intended connotation beyond its technical meaning.
+
+## Minor comments
+
+We thank the referee for these detailed and helpful editorial suggestions. 
+We agree with all the proposed corrections except for point 1. 
+According to the SI and Ocean Science submission guidelines (i.e. “Spaces must be included between number and unit (e.g. 1 %, 1 m).“), the percent sign (%) is treated as a unit and should therefore be preceded by a space (e.g., 20 % rather than 20%).
+All other points have been addressed as suggested in the revised manuscript.

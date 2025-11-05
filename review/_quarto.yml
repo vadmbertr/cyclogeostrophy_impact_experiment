@@ -1,0 +1,12 @@
+project:
+  type: manuscript
+
+manuscript:
+  article: index.qmd
+
+format:
+  pdf:
+    documentclass: report
+
+execute:
+  freeze: true
