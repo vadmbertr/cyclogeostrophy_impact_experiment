@@ -4,6 +4,7 @@ cgen
 clouddrift
 cmocean
 copernicusmarine
+dask
 # hydra
 hydra-zen
 jax
@@ -17,5 +18,9 @@ psutil
 pymbolic
 python-dotenv
 s3fs
+statsmodels
 toolz
+tqdm
 xarray
+xbatcher
+xesmf

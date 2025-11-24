@@ -3,7 +3,7 @@
 eval "$(command conda "shell.bash" "hook" 2> /dev/null)"
 eval "$(command conda "shell.zsh" "hook" 2> /dev/null)"
 
-# conda env create -f environment.yml
+conda env create -f environment.yml
 conda activate cyclogeostrophy_impact_experiment
 conda install pyinterp -c conda-forge
 pip install --upgrade pip
