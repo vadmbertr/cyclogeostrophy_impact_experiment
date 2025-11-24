@@ -1,0 +1,88 @@
+# Response to Anonymous Referee 2
+
+We thank the referee for the constructive and encouraging assessment of our work, as well as for the insightful suggestions that helped us clarify and improve the manuscript, especially with the addition of an evaluation using the eNATL60 model and pseudo-SWOT observations. \
+We particularly appreciate the referee’s positive feedback on the implementation quality of jaxparrow and its potential contribution to the standardization of cyclogeostrophic balance diagnostics.
+Regarding the suggestion to submit to JOSS, we note that we have already considered this option, but the package was deemed out of scope because its codebase is too small (not enough lines of code) to meet JOSS publication criteria.
+
+## Major comments
+
+### 1
+
+**The authors name their method “variational”, based on calling (4) the “variational form” of the cyclogeostrophic balance equation. I would recommend changing this.**
+
+- **“Variational” is a loaded mathematical word. For a nonlinear PDE like (2), the variational formulation does not straightforwardly lead to the minimization of residuals (4). Therefore, naming the method “variational” is not very informative of the underlying principle and can be confusing.**
+- **I would recommend a different name, say “least-square” or “minimization/optimization based”.**
+
+[It is indeed true that the term “variational” can be misleading, as it carries a specific mathematical meaning that may not strictly apply to our formulation. Although our approach allows for the inclusion of arbitrary regularization terms—which would make it closer in spirit to a true variational formulation—we agree that “minimization-based” better conveys the nature of our method. We have therefore replaced the term variational with minimization-based throughout the revised manuscript.]{color="#0000ff"}
+
+### 2
+
+**I would also recommend that the author call the traditional method written in (3) “fixed-point”. The minimization procedure is also iterative. Therefore, the name “iterative” can be applied to both methods, and can thus be confusing.
+Additionally, the numerical divergence behavior of the traditional method can be understood through classic theory about the behavior of the fixed-point method and contraction mapping.**
+
+[We agree with the referee that calling the traditional method written in equation (3) “iterative” is ambiguous, since both approaches involve iterative procedures. The suggestion to refer to this approach as a fixed-point method is well taken. This terminology is more precise and aligns with the mathematical framework of contraction mappings that explains its possible divergence. We have adopted this terminology in the revised manuscript.]{color="#0000ff"}
+
+### 3
+
+**Before (1), I think a quick derivation of the cyclogeostrophic balance equation is helpful.**
+
+- **It would show that (1) is based on ignoring the time partial in the horizontal momentum equation.**
+- **This is not a very well-grounded approximation, especially in the submesoscale, where the time partial term can be equal in magnitude to the advective and the Coriolis terms.**
+- **I view this as not an issue when the focus is on solving the cyclogeostrophic balance equation. But this is important when comparing with drifter data. Cyclogeostrophic balance is not obviously better than geostrophic balance in the submesoscale, since it includes one but ignores another term of equal asymptotic order.**
+
+[We acknowledge that including a brief derivation of the cyclogeostrophic balance equation before equation (1) improves clarity. We have added this derivation, explicitly showing that it results from neglecting the local time-derivative term in the horizontal momentum equations. We also note that this approximation may not hold at submesoscales, where the time-derivative term can be comparable to the advective and Coriolis terms. This limitation is now explicitly discussed in relation to the drifter-based validation.]{color="#0000ff"}
+
+### 4
+
+**§2.3: I cannot find a description of the minimization procedure.**
+
+- **I do note that the authors state more exploration can be done (Line 271), but I want to know what is currently applied.**
+- **From looking at the code, the authors used SGD in Optax, which I am not familiar with the details. What is the difference from GD in this case, since there is no minibatching?**
+- **Some math formula that writes out the gradient descent iteration might be helpful when comparing to (3). It is also an opportunity to elucidate how JAX automates the evaluation of the gradient (adjoint) needed in this iteration. This is helpful for an oceanographic audience that is not familiar with these techniques.**
+
+[We agree with the referee that a clearer description of the minimization procedure is necessary. We include an explicit formula for the gradient descent update and clarify how JAX is used to automatically compute the required gradients. This addition makes the procedure more transparent and helps readers unfamiliar with automatic differentiation understand how the optimization is implemented. The optimization is indeed performed by default using the stochastic gradient descent (SGD) implementation from Optax, without mini-batching, which effectively reduces to a standard gradient descent iteration.]{color="#0000ff"}
+
+### 5
+
+**From my point of view, there are two goals this paper tries to achieve. They are both referred to as “accurate” velocity, which is confusing.**
+
+(a) **Showcase a new numerical method for solving the cyclogeostrophic balance equation. It is better than the traditional method**
+(b) **Study if cyclogeostrophic balance improves upon geostrophic balance for velocity inversion from SSH.**
+
+**Then I think the paper has shown (a) convincingly. And I think this should be the main point of the paper, as also stated in the paragraph starting at Line 57.**
+
+- **One recommendation is to show the SWOT figures in Appendix B in the main text to make the point that cyclogeostrophic balance only depends on local SSH (cf. SQG-based method). Therefore, it can be applied to nontrivial but 2D observation geometry like SWOT swath. It will make mentioning of SWOT appear less gratuitous.**
+
+[Regarding the suggestion to move the SWOT results from Appendix B into the main text, we prefer not to include the existing appendix figures directly, since their purpose is illustrative rather than evaluative. 
+Instead, motivated by this comment and by comment 6, we now include in the main text a new assessment based on the eNATL60 model and pseudo-SWOT observations in the swath. 
+This addition demonstrates the applicability of our approach to the SWOT observation geometry while providing a more rigorous comparison than the original appendix material. 
+The SWOT appendix as therefore been removed.]{color="#0000ff"}
+
+### 6
+
+**Point (b) is very complex, and I think it is perpendicular to goal (a). I would like the authors to consider removing goal (b) entirely from this paper and addressing it in a separate piece.
+But I understand this requires major changes and delays. I leave the authors to decide. With that in mind, I have some comments and questions**
+
+- **In recent works Tranchant et al. [2025], Tchonang et al. [2025] have shown in the SWOT context that cyclogeostrophic balance’s improvement depends on the region and season. This is consistent with the result in Figure 5. The authors should take these papers into account when making the statement ”These
+results suggest that cyclogeostrophic corrections will become increasingly relevant as SSH products achieve higher effective resolution” in Line 257.**
+- **Figure 5 uses 6-hourly interpolated surface current velocity. This might include NIW signal that the cyclogeostrophic balance will not be able to get (cf. comment 3 above). In general, internal waves and tidal signals might contribute to the error statistics. This fact needs to be mentioned, and better, quantified.**
+- **When answering this question, model output is your friend. I would like to see Figure A1 plotted as the error of the diagnosed velocity. Question: What is the “observed” SSH here? Is there a low-pass filter and added noise to match observations? A bigger task is to do this for a bigger region and get error statistics like in Figure 4 and 5. The authors can decide if they want to take on this task in the revisions.**
+
+[We agree that fully removing the drifter-based evaluation would require a major restructuring of the manuscript, and we have therefore opted to retain this evaluation. However, we have strengthened and clarified this part of the analysis in several ways. \
+First, we now explicitly reference @tranchantSWOTRevealsFineScale2025 in line 257, noting that the improvement from cyclogeostrophic corrections depends on the effective SSH resolution, consistent with our findings.
+@tchonangSWOTGeostrophicVelocitya is refered to earlier in the manuscrit to underline the interest of the community in reconstructing cyclogeostrophic currents in the SWOT swath. \
+Second, we now apply the same pre-processing to the drifters data as @mullerGeostrophicCurrentsNorthern2019 by (i) removing the Ekman contribution (obtained from GlobCurrent, implementing @rioGOCEOceanCirculation2014) and (ii) filtering NIW signal using a second order Butterworth filter. \
+Finally, we have added a complementary evaluation using the eNATL60 simulation. In the revised manuscript, we reconstruct geostrophic and cyclogeostrophic currents from pseudo-SWOT swaths over the Mediterranean Sea and compare them with the model’s true surface field. This additional analysis reinforces point (b). In this experiment, we do not apply a low-pass filter or add noise to the SSH field: the eNATL60 SSH is directly reinterpolated onto a SWOT-like swath at 2 km resolution.]{color="#0000ff"}
+
+### 7
+
+**§3.2.2. The error metric can be improved. I agree with Referee #1 on having concerns here.**
+
+- **A better metric that is commonly used is mean squared error.**
+- **Then one can talk about the estimation error of the MSE, where the concept of the standard error can be applied. Right now the term “standard error” is applied erroneously. There should be a division by $\sqrt{N}$ if the author meant the standard deviation of the sample mean.**
+
+[We agree with the referee and with Referee #1 that the definition of the error metric needed improvement. The analysis now uses the root mean square error (RMSE) as the main performance metric. This change ensures that the assessment is statistically sound and avoids the incorrect use of the term “standard error”.]{color="#0000ff"}
+
+## Minor comments
+
+[We agree with all the minor comments, which have been implemented in the revised manuscript.]{color="#0000ff"}

@@ -1,5 +1,5 @@
 ---
-title: "Respond to all referee comments"
+title: "Response to the Referees' Comments"
 authors:
   - name: Vadim Bertrand
     email: vadim.bertrand@univ-grenoble-alpes.fr
@@ -7,11 +7,15 @@ authors:
       - name: IGE, Université Grenoble Alpes
     roles: writing
     corresponding: true
+filters:
+  - highlight-text
 bibliography: references.bib
 ---
 
 {{< include rev1.qmd >}}
 {{< include rev2.qmd >}}
+
+{{< pagebreak >}}
 
 ## References {.unnumbered}
 
